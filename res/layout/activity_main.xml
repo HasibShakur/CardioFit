@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical"
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:background="@drawable/heart2"
+>
+
+  <Button
+    android:id="@+id/Button02"
+    android:layout_width="400dip"
+    android:layout_height="200dip"
+    android:text="@string/start_workout"
+    android:layout_centerInParent="true"
+    android:textSize="48sp" android:textStyle="bold"
+    android:onClick="startWorkout" />
+
+  <Button
+      android:id="@+id/Button01"
+      android:layout_width="400dip"
+      android:layout_height="200dip"
+      android:layout_alignLeft="@+id/Button02"
+      android:layout_below="@+id/Button02"
+      android:layout_marginTop="48dp"
+      android:onClick="editProfile"
+      android:text="@string/edit_profile"
+      android:textSize="48sp"
+      android:textStyle="bold" />
+
+
+</RelativeLayout>
