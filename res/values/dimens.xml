@@ -12,6 +12,7 @@
     <dimen name="units">11sp</dimen>
     <dimen name="desired_pace">36sp</dimen>
     <dimen name="desired_pace_width">128sp</dimen>
+    <dimen name="heart_rate_label">25sp</dimen>
 
     <dimen name="button">48sp</dimen>
     <dimen name="button_sign">24sp</dimen>

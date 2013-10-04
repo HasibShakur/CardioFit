@@ -173,24 +173,44 @@
 
     <!-- Desired pace/speed row -->
         <!-- Container for desired pace/speed -->
+
         <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="154dp"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:layout_width="@dimen/desired_pace_width"
-            android:layout_height="wrap_content">
+            android:paddingBottom="@dimen/row_spacing">
             
-            <TextView android:id="@+id/desired_pace_label"
-                android:gravity="center_horizontal"
+            
+            <TextView
+                android:id="@+id/heart_rate"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/desired_pace"/>
-        
-            <!-- Current desired pace/speed -->
-            <TextView android:id="@+id/desired_pace_value"
+                android:layout_height="155dp"
+                android:background="@color/display_background"
                 android:gravity="center_horizontal"
-                android:textSize="@dimen/desired_pace"
-                android:layout_width="@dimen/desired_pace_width"
-                android:layout_height="wrap_content"/>
+                android:paddingBottom="@dimen/padding"
+                android:text="@string/heart_rate"
+                android:textColor="@color/red"
+                android:textSize="@dimen/heart_rate_label" />
         
         </LinearLayout>   
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            
+             <TextView
+                android:id="@+id/heart_range"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/display_background"
+                android:gravity="center_horizontal"
+                android:paddingBottom="@dimen/padding"
+                android:text="@string/heart_range"
+                android:textColor="@color/red"
+                android:textSize="@dimen/heart_rate_label" />
+            
+        </LinearLayout>
 </LinearLayout>
