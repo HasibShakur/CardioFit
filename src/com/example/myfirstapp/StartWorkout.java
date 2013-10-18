@@ -1,30 +1,19 @@
 package com.example.myfirstapp;
 
-import java.io.File;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.util.Log;
-import android.view.Menu;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.support.v4.app.NavUtils;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.content.Intent;
-import android.os.Build;
-import android.provider.MediaStore;
 
 public class StartWorkout extends Activity {
+    public final static String WORKOUT_TYPE = "com.example.myfirstapp.MESSAGE";
 
 	@SuppressLint("NewApi")
 	@Override
@@ -54,17 +43,22 @@ public class StartWorkout extends Activity {
 	}
 	
 	public void beginWorkout(View view) {
-		final Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
+		final Spinner workout_type_spinner = (Spinner) findViewById(R.id.spinner1);
 		final CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox1);
         if (checkBox.isChecked()) {
         	//Need to set up the bluetooth cardio tracker
         }
-		if (spinner1.equals("running")) {
+		if (workout_type_spinner.getSelectedItem().toString().equals("running")) {
 			//do the running workout
 			//this may include gps if we want
-		} else {
-			Intent intent = new Intent(this,Pedometer.class);
-			startActivity(intent);
 		}
+
+		
+		
+		Intent intent = new Intent(this, Workout.class);
+		String workout_type = workout_type_spinner.getSelectedItem().toString();
+		intent.putExtra(WORKOUT_TYPE, workout_type);
+		startActivity(intent);
+		
 	}
 }

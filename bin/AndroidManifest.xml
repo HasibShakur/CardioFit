@@ -33,14 +33,6 @@
                 android:value="com.example.myfirstapp.MainActivity" />
         </activity>
       	<activity
-            android:name="com.example.myfirstapp.FitnessTest"
-            android:label="@string/title_fitness_test"
-            android:parentActivityName="com.example.myfirstapp.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.myfirstapp.MainActivity" />
-        </activity>
-      	<activity
             android:name="com.example.myfirstapp.StartWorkout"
             android:label="@string/title_start_workout"
             android:parentActivityName="com.example.myfirstapp.MainActivity" >
@@ -48,28 +40,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.myfirstapp.MainActivity" />
         </activity>
-              	
-        	<activity 
-        	    	android:name="com.example.myfirstapp.Pedometer"
-                  	android:label="@string/title_workout"
-                  	android:configChanges="orientation">
-            		<meta-data
-	                	android:name="android.support.PARENT_ACTIVITY"
-	                	android:value="com.example.myfirstapp.StartWorkout" 
-	                />
-        	</activity>
-        	
-        	<activity android:name=".Settings"
-                	android:label="@string/activity_settings">
-            	<intent-filter>
-                	<action android:name="android.intent.action.MAIN" />
-                	<category android:name="android.intent.category.DEFAULT" />
-            	</intent-filter>
-        	</activity>
-
-       	 <service android:name=".StepService"/>	
-        	
-        	
         	
         	
         	
@@ -81,14 +51,7 @@
 	                android:name="android.support.PARENT_ACTIVITY"
 	                android:value="com.example.myfirstapp.StartWorkout" />
 	        </activity>
-	       		<activity
-		            android:name="com.example.myfirstapp.PlayMusic"
-		            android:label="@string/title_start_workout"
-		            android:parentActivityName="com.example.myfirstapp.Workout" >
-		            <meta-data
-		                android:name="android.support.PARENT_ACTIVITY"
-		                android:value="com.example.myfirstapp.Workout" />
-	        	</activity>
+
     </application>
 
 </manifest>

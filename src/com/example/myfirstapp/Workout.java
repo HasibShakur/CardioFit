@@ -1,46 +1,76 @@
 package com.example.myfirstapp;
 
-import java.io.File;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.support.v4.app.NavUtils;
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.content.Intent;
-import android.os.Build;
-import android.provider.MediaStore;
 
 public class Workout extends Activity {
+	private static final String TAG = "CardioFit";
+	
+
 
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.workout);
 
-	}
+		// Get the message from the intent
+	    Intent intent = getIntent();
+	    String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+		final TextView workout_type = (TextView) findViewById(R.id.workout_type);
+
+		//Log.i("message" , message);
+		//Log.i("TextView" , "workout_type = " + workout_type);
+		workout_type.setText(message);
 
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
+	
+	   @Override
+	    protected void onStart() {
+	        Log.i(TAG, "[ACTIVITY] onStart");
+	        super.onStart();
+	    }
+
+	    @Override
+	    protected void onResume() {
+	        Log.i(TAG, "[ACTIVITY] onResume");
+	        super.onResume();
+	    }
+	    
+	    
+	    @Override
+	    protected void onPause() {
+	        Log.i(TAG, "[ACTIVITY] onPause");
+	        super.onPause();
+	    }
+	    
+
+	    @Override
+	    protected void onStop() {
+	        Log.i(TAG, "[ACTIVITY] onStop");
+	        super.onStop();
+	    }
+
+	    protected void onDestroy() {
+	        Log.i(TAG, "[ACTIVITY] onDestroy");
+	        super.onDestroy();
+	    }
+	    
+	    protected void onRestart() {
+	        Log.i(TAG, "[ACTIVITY] onRestart");
+	        super.onDestroy();
+	    }
+
 
 	public void playMusic(View view) {
 		@SuppressWarnings("deprecation")

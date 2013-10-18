@@ -48,15 +48,6 @@ public class MainActivity extends Activity {
 		intent.putExtra(EXTRA_MESSAGE, "EDIT PROFILE");
 		startActivity(intent);
 	}
-	
-	public void fitnessTest(View view) {
-		//do something in response to button
-		Intent intent = new Intent(this, FitnessTest.class);
-		//EditText editText = (EditText) findViewById(R.id.edit_message);
-		//String message = editText.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, "FITNESS TEST");
-		startActivity(intent);
-	}
 }
 
 
