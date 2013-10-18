@@ -11,26 +11,25 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 public class Workout extends Activity {
-	private static final String TAG = "CardioFit";
+	private static final String TAG = "Workout";
 	
 
 
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG, "onCreate");
+		Log.i(TAG, "[ACTIVITY] onCreate");
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.workout);
 
-		// Get the message from the intent
+		// Get the message from the intent and change it
 	    Intent intent = getIntent();
 	    String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 		final TextView workout_type = (TextView) findViewById(R.id.workout_type);
-
-		//Log.i("message" , message);
-		//Log.i("TextView" , "workout_type = " + workout_type);
 		workout_type.setText(message);
+		
+		//Need to Get heart-rate range depending on what workout_type it is
 
 
 	}
