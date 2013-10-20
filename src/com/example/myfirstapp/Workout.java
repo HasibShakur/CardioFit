@@ -24,17 +24,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -61,24 +62,21 @@ public class Workout extends Activity {
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
-
-    // Layout Views
-    private ListView mConversationView;
-    private EditText mOutEditText;
-    private Button mSendButton;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
     // Array adapter for the conversation thread
     private ArrayAdapter<String> mConversationArrayAdapter;
-    // String buffer for outgoing messages
-    private StringBuffer mOutStringBuffer;
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
+    
+    //Timer
+    private Chronometer mChronometer;
+    long timeWhenStopped = 0;
+
 
 
     @Override
@@ -88,6 +86,8 @@ public class Workout extends Activity {
 
         // Set up the window layout
         setContentView(R.layout.workout);
+        
+        mChronometer = (Chronometer) findViewById(R.id.chronometer);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -137,14 +137,13 @@ public class Workout extends Activity {
         Log.d(TAG, "setupChat()");
 
         // Initialize the array adapter for the conversation thread
-        
         mConversationArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(this, mHandler);
-
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
+        
+        Intent serverIntent = new Intent(this, DeviceListActivity.class);
+        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
     }
 
     @Override
@@ -166,53 +165,6 @@ public class Workout extends Activity {
         if (mChatService != null) mChatService.stop();
         if(D) Log.e(TAG, "--- ON DESTROY ---");
     }
-
-    private void ensureDiscoverable() {
-        if(D) Log.d(TAG, "ensure discoverable");
-        if (mBluetoothAdapter.getScanMode() !=
-            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
-    }
-
-    /**
-     * Sends a message.
-     * @param message  A string of text to send.
-     */
-    private void sendMessage(String message) {
-        // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
-            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Check that there's actually something to send
-        if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
-            byte[] send = message.getBytes();
-            mChatService.write(send);
-
-            // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
-        }
-    }
-
-    // The action listener for the EditText widget, to listen for the return key
-    private TextView.OnEditorActionListener mWriteListener =
-        new TextView.OnEditorActionListener() {
-        public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-            // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                String message = view.getText().toString();
-                sendMessage(message);
-            }
-            if(D) Log.i(TAG, "END onEditorAction");
-            return true;
-        }
-    };
 
     private final void setStatus(int resId) {
         final ActionBar actionBar = getActionBar();
@@ -245,18 +197,6 @@ public class Workout extends Activity {
                     break;
                 }
                 break;
-            case MESSAGE_WRITE:
-                byte[] writeBuf = (byte[]) msg.obj;
-                // construct a string from the buffer
-                String writeMessage = new String(writeBuf);
-                mConversationArrayAdapter.add("Me:  " + writeMessage);
-                break;
-            case MESSAGE_READ:
-                byte[] readBuf = (byte[]) msg.obj;
-                // construct a string from the valid bytes in the buffer
-                String readMessage = new String(readBuf, 0, msg.arg1);
-                mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
-                break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
@@ -277,13 +217,7 @@ public class Workout extends Activity {
         case REQUEST_CONNECT_DEVICE_SECURE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data, true);
-            }
-            break;
-        case REQUEST_CONNECT_DEVICE_INSECURE:
-            // When DeviceListActivity returns with a device to connect
-            if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data, false);
+                connectDevice(data);
             }
             break;
         case REQUEST_ENABLE_BT:
@@ -297,45 +231,38 @@ public class Workout extends Activity {
                 Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
                 finish();
             }
-        }
+        } 
     }
 
-    private void connectDevice(Intent data, boolean secure) {
+    private void connectDevice(Intent data) {
         // Get the device MAC address
         String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
         // Get the BluetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         // Attempt to connect to the device
-        mChatService.connect(device, secure);
+        mChatService.connect(device);
     }
     
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent serverIntent = null;
-        switch (item.getItemId()) {
-        case R.id.secure_connect_scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
-            return true;
-        case R.id.insecure_connect_scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
-            return true;
-        case R.id.discoverable:
-            // Ensure this device is discoverable by others
-            ensureDiscoverable();
-            return true;
-        }
-        return false;
-    }
+    
+	public void playMusic(View view) {
+		@SuppressWarnings("deprecation")
+		Intent intent = new Intent(MediaStore.INTENT_ACTION_MUSIC_PLAYER);
+		startActivity(intent);
+	}
+	
+	public void startTimer(View view) {
+		mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
+		mChronometer.start();
+	}
+	
+	public void stopTimer (View view) {
+		timeWhenStopped = mChronometer.getBase() - SystemClock.elapsedRealtime();
+		mChronometer.stop();
+	}
+	
+	public void resetTimer (View view) {
+		mChronometer.setBase(SystemClock.elapsedRealtime());
+		timeWhenStopped = 0;
+	}
 
 }

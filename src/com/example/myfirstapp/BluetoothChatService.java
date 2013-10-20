@@ -19,7 +19,6 @@ package com.example.myfirstapp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
@@ -128,7 +127,7 @@ public class BluetoothChatService {
      * @param device  The BluetoothDevice to connect
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
-    public synchronized void connect(BluetoothDevice device, boolean secure) {
+    public synchronized void connect(BluetoothDevice device) {
         if (D) Log.d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
@@ -140,7 +139,7 @@ public class BluetoothChatService {
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device, secure);
+        mConnectThread = new ConnectThread(device);
         mConnectThread.start();
         setState(STATE_CONNECTING);
     }
@@ -354,40 +353,27 @@ public class BluetoothChatService {
         private final BluetoothDevice mmDevice;
         private String mSocketType;
 
-        public ConnectThread(BluetoothDevice device, boolean secure) {
+        public ConnectThread(BluetoothDevice device) {
             mmDevice = device;
             BluetoothSocket tmp = null;
-            mSocketType = secure ? "Secure" : "Insecure";
-
-            // Get a BluetoothSocket for a connection with the
-            // given BluetoothDevice
+            mSocketType = "Secure";
             try {
-                if (secure) {
-                    //tmp = device.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
-                	try {
-                	    tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
-                	    Method m = null;
-						try {
-							m = mmDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
-						} catch (NoSuchMethodException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-                	    try {
-							tmp = (BluetoothSocket) m.invoke(mmDevice, 1);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-                	} catch (IOException e) {
-                	    Log.e(TAG, "create() failed", e);
-                	}
-                } else {
-                    tmp = device.createInsecureRfcommSocketToServiceRecord(
-                            MY_UUID_INSECURE);
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
-            }
+			    tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+			    Method m = null;
+				try {
+					m = mmDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			    try {
+					tmp = (BluetoothSocket) m.invoke(mmDevice, 1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} catch (IOException e) {
+			    Log.e(TAG, "create() failed", e);
+			}
             mmSocket = tmp;
         }
 

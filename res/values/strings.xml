@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!--  WorkoutActivity -->
+    <string name="Workout_Type">Workout Type:</string>
+    <string name="heart_rate">heart rate</string>
+    <string name="heart_range">heart-rate range</string>
+    <string name="chronometer_initial_format">Initial format:<xliff:g id="initial-format">%</xliff:g></string>
+    <string name="Start">Start</string>
+    <string name="Stop">Stop</string>
+    <string name="Reset">Reset</string>
+    
+    
     
     <!--  DeviceListActivity -->
     <string name="scanning">scanning for devices...</string>
@@ -15,7 +25,7 @@
     <string name="not_connected">You are not connected to a device</string>
     <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
     <string name="title_connecting">connecting...</string>
-    <string name="title_connected_to">connected to...</string>
+    <string name="title_connected_to">connected to <xliff:g id="device_name">%1$s</xliff:g></string>
     
     <string name="title_not_connected">not connected</string>
     
@@ -41,8 +51,7 @@
     <string name="kilograms">kilograms</string>
     <string name="pounds">pounds</string>
     
-    <string name="heart_rate">heart rate</string>
-    <string name="heart_range">heart-rate range</string>
+
 
     <string name="desired_pace">Desired pace:</string>
     <string name="desired_speed">Desired speed:</string>
@@ -147,7 +156,6 @@
     
     <string name="title_start_workout">Start Workout</string>
     <string name="Play_Music">Play Music</string>
-    <string name="Workout_Type">Workout Type:</string>
     <string name="Use_Heart_Monitor">Use Heart Monitor</string>
     <string-array name="workouts_array">
         <item>Lifting</item>
