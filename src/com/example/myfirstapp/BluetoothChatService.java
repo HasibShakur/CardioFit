@@ -45,19 +45,18 @@ public class BluetoothChatService {
 
     // Name for the SDP record when creating server socket
     private static final String NAME_SECURE = "BluetoothChatSecure";
-    private static final String NAME_INSECURE = "BluetoothChatInsecure";
+    //private static final String NAME_INSECURE = "BluetoothChatInsecure";
 
     // Unique UUID for this application
     private static final UUID MY_UUID_SECURE =
         UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID MY_UUID_INSECURE =
-        UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    //private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     // Member fields
     private final BluetoothAdapter mAdapter;
     private final Handler mHandler;
     private AcceptThread mSecureAcceptThread;
-    private AcceptThread mInsecureAcceptThread;
+    //private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
@@ -88,7 +87,7 @@ public class BluetoothChatService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(Workout.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(StartWorkout.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -113,13 +112,13 @@ public class BluetoothChatService {
 
         // Start the thread to listen on a BluetoothServerSocket
         if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(true);
+            mSecureAcceptThread = new AcceptThread();
             mSecureAcceptThread.start();
         }
-        if (mInsecureAcceptThread == null) {
+      /*  if (mInsecureAcceptThread == null) {
             mInsecureAcceptThread = new AcceptThread(false);
             mInsecureAcceptThread.start();
-        }
+        }*/
     }
 
     /**
@@ -164,19 +163,15 @@ public class BluetoothChatService {
             mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
         }
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.cancel();
-            mInsecureAcceptThread = null;
-        }
 
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket, socketType);
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(Workout.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(Workout.DEVICE_NAME, device.getName());
+        bundle.putString(StartWorkout.DEVICE_NAME, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -203,11 +198,11 @@ public class BluetoothChatService {
             mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
         }
-
+/*
         if (mInsecureAcceptThread != null) {
             mInsecureAcceptThread.cancel();
             mInsecureAcceptThread = null;
-        }
+        } */
         setState(STATE_NONE);
     }
 
@@ -233,9 +228,9 @@ public class BluetoothChatService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(Workout.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(Workout.TOAST, "Unable to connect device");
+        bundle.putString(StartWorkout.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -248,9 +243,9 @@ public class BluetoothChatService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(Workout.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(Workout.TOAST, "Device connection was lost");
+        bundle.putString(StartWorkout.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -268,19 +263,13 @@ public class BluetoothChatService {
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
 
-        public AcceptThread(boolean secure) {
+        public AcceptThread() {
             BluetoothServerSocket tmp = null;
-            mSocketType = secure ? "Secure":"Insecure";
+            mSocketType = "Secure";
 
             // Create a new listening server socket
             try {
-                if (secure) {
-                    tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE,
-                        MY_UUID_SECURE);
-                } else {
-                    tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                            NAME_INSECURE, MY_UUID_INSECURE);
-                }
+            	tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE,MY_UUID_SECURE);
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "listen() failed", e);
             }
@@ -288,8 +277,7 @@ public class BluetoothChatService {
         }
 
         public void run() {
-            if (D) Log.d(TAG, "Socket Type: " + mSocketType +
-                    "BEGIN mAcceptThread" + this);
+            if (D) Log.d(TAG, "Socket Type: " + mSocketType + "BEGIN mAcceptThread" + this);
             setName("AcceptThread" + mSocketType);
 
             BluetoothSocket socket = null;
@@ -382,7 +370,7 @@ public class BluetoothChatService {
             setName("ConnectThread" + mSocketType);
 
             // Always cancel discovery because it will slow down a connection
-            //mAdapter.cancelDiscovery();
+            mAdapter.cancelDiscovery();
 
             // Make a connection to the BluetoothSocket
             try {
@@ -390,7 +378,6 @@ public class BluetoothChatService {
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
                 mmSocket.connect();
-                Log.i(TAG, "connected to the thing");
             } catch (IOException e) {
                 Log.i(TAG, "" + e);
 
@@ -462,7 +449,7 @@ public class BluetoothChatService {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(Workout.MESSAGE_READ, bytes, -1, buffer)
+                    mHandler.obtainMessage(StartWorkout.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
@@ -483,7 +470,7 @@ public class BluetoothChatService {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(Workout.MESSAGE_WRITE, -1, -1, buffer)
+                mHandler.obtainMessage(StartWorkout.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);

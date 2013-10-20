@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:padding="@dimen/margin" 
-    android:background="@color/screen_background">
+    android:background="@color/screen_background"
+    android:orientation="vertical"
+    android:padding="@dimen/margin" >
     
     <LinearLayout android:id="@+id/row_1"
         android:orientation="horizontal" 
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content" 
         android:paddingBottom="@dimen/row_spacing"
-        android:layout_centerHorizontal="true"
         >
     
         <LinearLayout android:id="@+id/box_workout_type"
@@ -21,8 +20,8 @@
             android:gravity="center_horizontal"
             android:paddingRight="@dimen/margin"
             android:layout_weight="1">
-        
-            <TextView android:id="@+id/workout_type"
+            
+           <TextView android:id="@+id/workout_type"
                 android:textSize="@dimen/value"
                 android:layout_width="fill_parent" 
                 android:layout_height="wrap_content"
@@ -32,7 +31,7 @@
                 android:paddingRight="@dimen/padding" 
                 android:paddingTop="@dimen/padding"
                 android:text=""
-                android:textColor="@color/red" />
+                android:textColor="@color/red" /> 
             <TextView android:id="@+id/workout_type_label"
                 android:gravity="center_horizontal"
                 android:layout_width="fill_parent"
@@ -42,6 +41,8 @@
                 android:textColor="@color/red" 
                 android:background="@color/display_background" 
                 android:paddingBottom="@dimen/padding"/>
+                
+                
 
         </LinearLayout>
     </LinearLayout>
@@ -136,44 +137,8 @@
 	        android:layout_height="wrap_content" 
 	        android:paddingBottom="@dimen/row_spacing"
 	        android:baselineAligned="false">
-
-          <Button
-              android:id="@+id/Play_Music_Button"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:text="@string/Play_Music"
-              android:onClick="playMusic" >
-
-          </Button>
            
        </LinearLayout>
-       
-		<LinearLayout
-		            android:layout_width="fill_parent"
-		            android:layout_height="wrap_content"
-		            android:orientation="horizontal"
-		            android:gravity="center">
-		            <Button
-		               android:text="@string/Start"
-		               android:id="@+id/start_button"
-		               android:layout_width="wrap_content"
-		               android:layout_height="wrap_content"
-		               android:onClick="startTimer"/>
-		            <Button
-		                android:text="@string/Stop"
-		                android:id="@+id/stop_button"
-		                android:layout_width="wrap_content"
-		                android:layout_height="wrap_content"
-		                android:onClick="stopTimer"/>
-
-		            <Button
-		                android:id="@+id/resume_button"
-		                android:layout_width="wrap_content"
-		                android:layout_height="wrap_content"
-		                android:onClick="resetTimer"
-		                android:text="@string/Reset" />
-
-		 </LinearLayout>
 
 		<Chronometer
 		    android:id="@+id/chronometer"
@@ -181,6 +146,43 @@
 		    android:layout_height="wrap_content"
 		    android:layout_gravity="center_horizontal"
 		    android:format="%s"
-		    android:textSize="40sp" />
+		    android:textSize="40sp"
+		    android:textColor="@color/green" />
+
+		<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:gravity="center"
+		    android:orientation="horizontal" >
+
+		    <Button
+		        android:id="@+id/start_button"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:onClick="startTimer"
+		        android:text="@string/Start" />
+
+		    <Button
+		        android:id="@+id/stop_button"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:onClick="stopTimer"
+		        android:text="@string/Stop" />
+
+		    <Button
+		        android:id="@+id/resume_button"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:onClick="resetTimer"
+		        android:text="@string/Reset" />
+		</LinearLayout>
+
+		<Button
+		    android:id="@+id/Play_Music_Button"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="bottom"
+		    android:onClick="playMusic"
+		    android:text="@string/Play_Music" />
 
 </LinearLayout>

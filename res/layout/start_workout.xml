@@ -9,9 +9,8 @@
     tools:context=".StartWorkout" >
 
 
-
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/workout_type_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -19,28 +18,20 @@
             android:text="@string/Workout_Type" />
 
         <Spinner
-            android:id="@+id/spinner1"
+            android:id="@+id/workout_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView1"
+            android:layout_below="@+id/workout_type_label"
             android:entries="@array/workouts_array"
             android:prompt="@string/Workout_Type" />
 
-        <CheckBox
-            android:id="@+id/checkBox1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/spinner1"
-            android:text="@string/Use_Heart_Monitor" />
-
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/start_workout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:text="@string/start_workout"
-            android:onClick="beginWorkout"/>
+            android:onClick="startWorkout"/>
 </RelativeLayout>

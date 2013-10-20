@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,8 +22,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-
-	public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
+	public final static String TAG = "MainActivity";
+	//public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -33,19 +34,63 @@ public class MainActivity extends Activity {
 
 	}
 	
+	@Override
+    protected void onStart() {
+        Log.i(TAG, "[ACTIVITY] onStart");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i(TAG, "[ACTIVITY] onResume");
+        super.onResume();
+    }
+    
+    
+    @Override
+    protected void onPause() {
+        Log.i(TAG, "[ACTIVITY] onPause");
+        super.onPause();
+    }
+    
+
+    @Override
+    protected void onStop() {
+        Log.i(TAG, "[ACTIVITY] onStop");
+        super.onStop();
+    }
+
+    protected void onDestroy() {
+        Log.i(TAG, "[ACTIVITY] onDestroy");
+        super.onDestroy();
+    }
+    
+    protected void onRestart() {
+        Log.i(TAG, "[ACTIVITY] onRestart");
+        super.onDestroy();
+    }
+    
+    /**
+     * Called When user clicks 'Start Workout'
+     * Opens the start_workout activity
+     * @param view
+     * @author: Wyatt Kaiser
+     */
 	public void startWorkout(View view) {
-		//do something in response to button
 		Intent intent = new Intent(this, StartWorkout.class);
-		intent.putExtra(EXTRA_MESSAGE, "START WORKOUT");
+		//intent.putExtra(EXTRA_MESSAGE, "START WORKOUT");
 		startActivity(intent);
 	}
 	
+	/**
+	 * Called when a user clicks 'Edit Profile'
+	 * Opens the edit profile activity
+	 * @param view
+	 * @author: Wyatt Kaiser
+	 */
 	public void editProfile(View view) {
-		//do something in response to button
 		Intent intent = new Intent(this, EditProfile.class);
-		//EditText editText = (EditText) findViewById(R.id.edit_message);
-		//String message = editText.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, "EDIT PROFILE");
+		//intent.putExtra(EXTRA_MESSAGE, "EDIT PROFILE");
 		startActivity(intent);
 	}
 }

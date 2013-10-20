@@ -42,6 +42,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.myfirstapp.MainActivity" />
         </activity>
+        
+      	<activity android:name=".DeviceListActivity"
+                  android:label="@string/select_device"
+                  android:theme="@android:style/Theme.Holo.Dialog"
+                  android:configChanges="orientation|keyboardHidden" >
+            <meta-data
+	              android:name="android.support.PARENT_ACTIVITY"
+	              android:value="com.example.myfirstapp.StartWorkout" />
+        </activity>
         	
         	
         	
@@ -53,14 +62,7 @@
 	                android:name="android.support.PARENT_ACTIVITY"
 	                android:value="com.example.myfirstapp.StartWorkout" />
 	        </activity>
-	         <activity android:name=".DeviceListActivity"
-                  android:label="@string/select_device"
-                  android:theme="@android:style/Theme.Holo.Dialog"
-                  android:configChanges="orientation|keyboardHidden" >
-	            <meta-data
-	                android:name="android.support.PARENT_ACTIVITY"
-	                android:value="com.example.myfirstapp.Workout" />
-	          </activity>
+
 
     </application>
 
