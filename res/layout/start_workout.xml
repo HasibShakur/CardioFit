@@ -34,4 +34,5 @@
             android:layout_centerVertical="true"
             android:text="@string/start_workout"
             android:onClick="startWorkout"/>
+
 </RelativeLayout>
