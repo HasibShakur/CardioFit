@@ -16,17 +16,23 @@
 
 package com.example.myfirstapp;
 
+import java.util.ArrayList;
+
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,8 +46,13 @@ import android.widget.Toast;
 /**
  * This is the main Activity that displays the current chat session.
  */
-public class Workout extends Activity {
+public class Workout extends Activity implements OnInitListener {
 	
+    private TextToSpeech tts;
+    private static boolean voice_on = true;
+    private static final int VOICE_OFF = 9;
+    private static final int VOICE_ON = 8;
+
 	 // Debugging
     private static final String TAG = "Workout";
     private static final boolean D = true;
@@ -74,17 +85,18 @@ public class Workout extends Activity {
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
-    private StringBuffer mOutStringBuffer;
-    // Name of the connected device
+	private static final int MY_DATA_CHECK_CODE = 0;
+
     private String mConnectedDeviceName = null;
-    // Array adapter for the conversation thread
     private ArrayAdapter<String> mConversationArrayAdapter;
     private TextView mHeartRate;
     private TextView mHeartRange;
-    // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
-    // Member object for the chat services
     private BluetoothChatService mChatService = null;
+    
+    
+    private ArrayList<Integer> heartRates = new ArrayList<Integer>();
+    private ArrayList<Integer> tempHeartRates = new ArrayList<Integer>();
     
     
 
@@ -110,6 +122,8 @@ public class Workout extends Activity {
         
         mWorkoutType = (TextView) findViewById(R.id.workout_type);
         mWorkoutType.setText(workout_type);
+        
+
 	}
 
 	@Override
@@ -117,8 +131,7 @@ public class Workout extends Activity {
         Log.i(TAG, "[ACTIVITY] onStart");
         super.onStart();
         
-     // If BT is not on, request that it be enabled.
-        // setupChat() will then be called during onActivityResult
+        // If BT is not on, request that it be enabled.
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
@@ -182,8 +195,7 @@ public class Workout extends Activity {
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(this, mHandler);
         
-    	// Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
+    	new StringBuffer("");
         Intent serverIntent = new Intent(this, DeviceListActivity.class);
         startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
     }
@@ -229,9 +241,46 @@ public class Workout extends Activity {
                 break;
             case MESSAGE_READ:
             	byte[] readBuf = null;
-            	readBuf = (byte[]) msg.obj;                
-                String Value = parseBioharnessPacket(readBuf);
+            	readBuf = (byte[]) msg.obj;         
+            	
+            	String Value = byteToHex(readBuf[13]);
+            	Log.i(TAG, Value);
+                //String Value = parseBioharnessPacket(readBuf);
                 int heart_rate = Integer.parseInt(Value, 16);
+                
+                
+                
+                // Need to change to fit user's range for whichever workout they chose
+                // TEMPORARY
+                heartRates.add(heart_rate);
+
+                tempHeartRates.add(heart_rate);
+                int avg = 0;
+                if (tempHeartRates.size() == 15) {
+                	int total = 0;
+	                for (int hr : tempHeartRates) {
+	                	total = total + hr;
+	                }
+	                avg = total/15;
+	                Log.i(TAG, "AVERAGE = " + avg);
+            		tempHeartRates.clear();
+
+                }
+                
+                if (avg <= 65 && avg != 0 && voice_on == true) {
+            		tts.speak("Heart Rate Too Low", TextToSpeech.QUEUE_ADD, null);
+                }
+                if (avg >= 85 && voice_on == true) {
+            		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
+                }
+                
+                if (heart_rate <= 65) {
+                	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
+                } else if (heart_rate >= 85) {
+                	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
+                } else {
+                	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
+                }
                 mHeartRate.setText(String.valueOf(heart_rate));
                 break;
             case MESSAGE_DEVICE_NAME:
@@ -246,6 +295,15 @@ public class Workout extends Activity {
         			mChronometer.start();
         			isChronometerRunning = true;
         		}
+                
+        		if (tts != null && voice_on == true) {
+	        		tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+        		}
+        		
+        	    Intent checkIntent = new Intent();
+        	    checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        	    startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+        	    
                 break;
             case MESSAGE_TOAST:
                 Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),Toast.LENGTH_SHORT).show();
@@ -255,131 +313,7 @@ public class Workout extends Activity {
     };
 
     
-    public String byte2hex(byte[] b){
-      // String Buffer can be used instead
-      String hs = "";
-      String stmp = "";
 
-      for (int n = 0; n < b.length; n++){
-         stmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
-
-         if (stmp.length() == 1){
-            hs = hs + "0" + stmp;
-         }
-         else{
-            hs = hs + stmp;
-         }
-         if (n < b.length - 1){
-            hs = hs + "";
-         }
-      }
-
-      return hs;
-   }
-    
-	/**
-	 * Convert a byte to a hex string.
-	 * 
-	 * @param data
-	 *            the byte to convert
-	 * @return String the converted byte
-	 */
-	public static String byteToHex(byte data) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(toHexChar((data >>> 4) & 0x0F));
-		buf.append(toHexChar(data & 0x0F));
-		return buf.toString();
-	}
-	
-	/**
-	 * Convert an int to a hex char.
-	 * 
-	 * @param i
-	 *            is the int to convert
-	 * @return char the converted char
-	 */
-	public static char toHexChar(int i) {
-		if ((0 <= i) && (i <= 9))
-			return (char) ('0' + i);
-		else
-			return (char) ('a' + (i - 10));
-	}
-	
-	/**
-	 * Merge two bytes into a signed 2's complement integer
-	 * 
-	 * @param low
-	 *            byte is LSB
-	 * @param high
-	 *            byte is the MSB
-	 * @return a signed intt value
-	 */
-	public static int merge(byte low, byte high) {
-		int b = 0;
-		b += (high << 8) + low;
-		if ((high & 0x80) != 0) {
-			b = -(0xffffffff - b);
-		}
-		return b;
-	}
-    
-    
-    /**
-	 * Convert a raw bluetooth packet to XML command object
-	 * 
-	 * @param packet
-	 *            packet is the raw bytes from the SPP
-	 * @return Command is the same command but with the Base Bioharness elements
-	 *         added
-	 */
-	public static String parseBioharnessPacket(byte[] packet) {
-
-		String hrValue = null;
-		String hrBytes = null;
-		String batteryValue = null;
-		String postureValue = null;
-		String respirationValue = null;
-		String tempValue = null;
-		
-		try {
-
-			/** add packet type to avoid confusion with RR packets */
-			// command.add(constants.KIND, DATA);
-			//command.add(PrototypeFactory.beat, ZephyrUtils.parseString(packet, 3));
-			
-			hrBytes = byteToHex(packet[13]);
-			//short hrtValue = Short.parseShort(hrBytes, 16);
-			//command.add(PrototypeFactory.heart, Short.toString(hrValue));
-			//hrValue = String.valueOf(hrtValue);
-			Log.i(TAG, "hrValue = " + hrValue);
-			
-			int v = merge(packet[24], packet[25]);
-			//command.add(PrototypeFactory.battery, String.valueOf(((double) v / (double) 1000)));
-			batteryValue = String.valueOf(((double) v / (double) 1000));
-			Log.i(TAG, "batteryValue = " + batteryValue);
-
-			int p = merge(packet[18], packet[19]);
-			//command.add(PrototypeFactory.posture, String.valueOf(((double) p / (double) 10)));
-			postureValue = String.valueOf(((double) p / (double) 10));
-			Log.i(TAG, "posture value = " + postureValue);
-			
-			int r = merge(packet[14], packet[15]);
-			//command.add(PrototypeFactory.respiration, String.valueof(Math.abs(((double) r / (double) 10))));
-			respirationValue = String.valueOf(Math.abs(((double) r / (double) 10)));
-			Log.i(TAG, "respiration value = " + respirationValue);
-			
-			int t = merge(packet[16], packet[17]);
-			//command.add(PrototypeFactory.temperature, String.valueOf(((double) t / (double) 10)));
-			tempValue = String.valueOf(String.valueOf(((double) t / (double) 10)));
-			Log.i(TAG, "tempValue = " + tempValue);
-
-		} catch (Exception e) {
-			Log.i(TAG, "parseBioharnessPacket() : " + e.getMessage());
-		}
-
-		/** add other tags before sending ? */
-		return hrBytes;
-	}
 
     
     
@@ -403,8 +337,24 @@ public class Workout extends Activity {
                 Log.d(TAG, "BT not enabled");
                 Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
                 finish();
+            } 
+            break;
+        case MY_DATA_CHECK_CODE: // For text to speech
+        	Log.i(TAG, "my data check code");
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+            	Log.i(TAG, "check voice data pass");
+                // success, create the TTS instance
+                tts = new TextToSpeech(this, this);
+            } 
+            else {
+                // missing data, install it
+            	Log.i(TAG, "not check voice data pass");
+                Intent installIntent = new Intent();
+                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
             }
-        } 
+            break;
+        }
     }
 
     private void connectDevice(Intent data) {
@@ -432,13 +382,47 @@ public class Workout extends Activity {
             serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
             return true;
+        case VOICE_OFF:
+        	voice_on = false;
+            Toast.makeText(this, R.string.voice_turned_off, Toast.LENGTH_SHORT).show();
+        	return true;
+        case VOICE_ON:
+        	voice_on = true;
+            Toast.makeText(this, R.string.voice_turned_on, Toast.LENGTH_SHORT).show();
+            return true;
         }
         return false;
     }
     
+    /* Creates the menu items */
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        if (voice_on == true) {
+	        menu.add(0, VOICE_OFF, 0, R.string.turn_off_voice)
+	        .setIcon(android.R.drawable.ic_lock_power_off)
+	        .setShortcut('9', 'q');
+        } else {
+        	menu.add(0, VOICE_ON, 0, R.string.turn_on_voice)
+        	.setIcon(android.R.drawable.ic_lock_power_off)
+        	.setShortcut('9', 'q');
+        }
+        return true;
+    }
     
-    
-    
+	@Override
+	public void onInit(int status) {
+		Log.i(TAG, "onInit");
+        if (status == TextToSpeech.SUCCESS) {
+            Toast.makeText(Workout.this, "Text-To-Speech engine is initialized", Toast.LENGTH_LONG).show();
+            if (voice_on == true) {
+            	tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+            }
+        }
+        else if (status == TextToSpeech.ERROR) {
+            Toast.makeText(Workout.this, 
+                    "Error occurred while initializing Text-To-Speech engine", Toast.LENGTH_LONG).show();
+        }		
+	}
     
     
     
@@ -486,6 +470,10 @@ public class Workout extends Activity {
 			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
 			mChronometer.start();
 			isChronometerRunning = true;
+            if (voice_on == true) {
+            	tts.speak("Timer Started", TextToSpeech.QUEUE_ADD, null);
+            }
+
 		}
 	}
 	
@@ -494,6 +482,9 @@ public class Workout extends Activity {
 			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
 			mChronometer.stop();
 			isChronometerRunning = false;
+            if (voice_on == true) {
+            	tts.speak("Timer Stopped", TextToSpeech.QUEUE_ADD, null);
+            }
 		}
 	}
 	
@@ -505,5 +496,125 @@ public class Workout extends Activity {
 		}
 		timeWhenClicked = 0;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    public String byte2hex(byte[] b){
+        // String Buffer can be used instead
+        String hs = "";
+        String stmp = "";
+
+        for (int n = 0; n < b.length; n++){
+           stmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
+
+           if (stmp.length() == 1){
+              hs = hs + "0" + stmp;
+           }
+           else{
+              hs = hs + stmp;
+           }
+           if (n < b.length - 1){
+              hs = hs + "";
+           }
+        }
+
+        return hs;
+     }
+  	public static String byteToHex(byte data) {
+  		StringBuffer buf = new StringBuffer();
+  		buf.append(toHexChar((data >>> 4) & 0x0F));
+  		buf.append(toHexChar(data & 0x0F));
+  		return buf.toString();
+  	}
+  	public static char toHexChar(int i) {
+  		if ((0 <= i) && (i <= 9))
+  			return (char) ('0' + i);
+  		else
+  			return (char) ('a' + (i - 10));
+  	}
+  	public static int merge(byte low, byte high) {
+  		int b = 0;
+  		b += (high << 8) + low;
+  		if ((high & 0x80) != 0) {
+  			b = -(0xffffffff - b);
+  		}
+  		return b;
+  	}
+  	public static String parseBioharnessPacket(byte[] packet) {
+
+  		String hrValue = null;
+  		String hrBytes = null;
+  		String batteryValue = null;
+  		String postureValue = null;
+  		String respirationValue = null;
+  		String tempValue = null;
+  		
+  		try {
+
+  			/** add packet type to avoid confusion with RR packets */
+  			// command.add(constants.KIND, DATA);
+  			//command.add(PrototypeFactory.beat, ZephyrUtils.parseString(packet, 3));
+  			
+  			hrBytes = byteToHex(packet[13]);
+  			//short hrtValue = Short.parseShort(hrBytes, 16);
+  			//command.add(PrototypeFactory.heart, Short.toString(hrValue));
+  			//hrValue = String.valueOf(hrtValue);
+  			//Log.i(TAG, "hrValue = " + hrValue);
+  			
+  			int v = merge(packet[24], packet[25]);
+  			//command.add(PrototypeFactory.battery, String.valueOf(((double) v / (double) 1000)));
+  			batteryValue = String.valueOf(((double) v / (double) 1000));
+  			//Log.i(TAG, "batteryValue = " + batteryValue);
+
+  			int p = merge(packet[18], packet[19]);
+  			//command.add(PrototypeFactory.posture, String.valueOf(((double) p / (double) 10)));
+  			postureValue = String.valueOf(((double) p / (double) 10));
+  			//Log.i(TAG, "posture value = " + postureValue);
+  			
+  			int r = merge(packet[14], packet[15]);
+  			//command.add(PrototypeFactory.respiration, String.valueof(Math.abs(((double) r / (double) 10))));
+  			respirationValue = String.valueOf(Math.abs(((double) r / (double) 10)));
+  			//Log.i(TAG, "respiration value = " + respirationValue);
+  			
+  			int t = merge(packet[16], packet[17]);
+  			//command.add(PrototypeFactory.temperature, String.valueOf(((double) t / (double) 10)));
+  			tempValue = String.valueOf(String.valueOf(((double) t / (double) 10)));
+  			//Log.i(TAG, "tempValue = " + tempValue);
+
+  		} catch (Exception e) {
+  			Log.i(TAG, "parseBioharnessPacket() : " + e.getMessage());
+  		}
+
+  		/** add other tags before sending ? */
+  		return hrBytes;
+  	}
 
 }

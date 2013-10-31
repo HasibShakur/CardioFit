@@ -177,6 +177,27 @@
 		        android:text="@string/Reset" />
 		</LinearLayout>
 
+		<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:gravity="center"
+		    android:orientation="horizontal" >
+
+			<Button
+		    android:id="@+id/Save_Workout_Button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/save_workout" />
+			
+			<Button
+		    android:id="@+id/discard_workout_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/discard_workout" />
+			
+		</LinearLayout>
+		
+
 		<Button
 		    android:id="@+id/Play_Music_Button"
 		    android:layout_width="match_parent"
