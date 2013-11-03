@@ -16,7 +16,7 @@
      />
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/editTextName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -31,12 +31,12 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText1"
+        android:layout_below="@+id/editTextName"
         android:text="@string/Age" 
      />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/editTextAge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -49,12 +49,12 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText2"
+        android:layout_below="@+id/editTextAge"
         android:text="@string/Weight" 
      />
 
     <EditText
-        android:id="@+id/editText3"
+        android:id="@+id/editTextWeight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -67,12 +67,12 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText3"
+        android:layout_below="@+id/editTextWeight"
         android:text="@string/Height" 
      />
 
     <EditText
-        android:id="@+id/editText4"
+        android:id="@+id/editTextHeightFt"
         android:layout_width="50dip"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -82,15 +82,58 @@
         android:inputType="number" />
 
     <EditText
-        android:id="@+id/editText5"
+        android:id="@+id/editTextHeightIn"
         android:layout_width="75dip"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView4"
         android:layout_marginLeft="16dp"
-        android:layout_toRightOf="@+id/editText4"
+        android:layout_toRightOf="@+id/editTextHeightFt"
         android:ems="10"
         android:hint="@string/in"
         android:inputType="number"
         android:paddingRight="50dip" />
+    
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextHeightFt"
+        android:text="@string/highHeartRate" />
+    
+    <EditText
+        android:id="@+id/editTextHeartRateHigh"
+        android:layout_width="50dip"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView5"
+        android:ems="10"
+        android:hint="@string/highHeartRate"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextHeartRateHigh"
+        android:text="@string/lowHeartRate" />
+    <EditText
+        android:id="@+id/editTextHeartRateLow"
+        android:layout_width="50dip"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView6"
+        android:ems="10"
+        android:hint="@string/lowHeartRate"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/buttonSaveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextHeartRateLow"
+        android:layout_marginTop="26dp"
+        android:layout_toRightOf="@+id/textView4"
+        android:onClick="onClick"
+        android:text="@string/save" />
 
 </RelativeLayout>

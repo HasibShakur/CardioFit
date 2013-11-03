@@ -148,6 +148,9 @@
     <string name="Height">Height</string>
     <string name="ft">ft</string>
     <string name="in">in</string>
+    <string name="highHeartRate">High Heart Rate</string>
+    <string name="lowHeartRate">Low Heart Rate</string>
+    <string name="save">save</string>
     
     
     <string name="title_fitness_test">Fitness Test</string>
