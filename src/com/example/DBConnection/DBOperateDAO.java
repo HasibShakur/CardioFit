@@ -47,10 +47,10 @@ public class DBOperateDAO {
 	{
 		helper.close();
 	}
-	public ProfileDTO createProfile(ProfileDTO profile)
+	public void createProfile(ProfileDTO profile)
 	{
+		System.out.println("Operation performed");
 		ContentValues values = new ContentValues();
-		values.put(DBTableContract.Profile.COLUMN_NAME_PERSON_ID, profile.getPersonId());
 		values.put(DBTableContract.Profile.COLUMN_NAME_NAME, profile.getPersonName());
 		values.put(DBTableContract.Profile.COLUMN_NAME_AGE, profile.getPersonAge());
 		values.put(DBTableContract.Profile.COLUMN_NAME_HEIGHT, profile.getHeight());
@@ -59,14 +59,21 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, profile.getWeightManageLowHeartRate());
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
-		long newRowId = database.insert(DBTableContract.Profile.TABLE_NAME, null, values);
-		Cursor cursor = database.query(DBTableContract.Profile.TABLE_NAME,
-			        profileColumns, DBTableContract.Profile.COLUMN_NAME_PERSON_ID + " = " + newRowId, null,
-			        null, null, null);
-		cursor.moveToFirst();
-		ProfileDTO newProfile = cursorToProfile(cursor);
-		cursor.close();
-		return newProfile;
+		database.insert(DBTableContract.Profile.TABLE_NAME, null, values);
+	}
+	public void updateProfile(ProfileDTO profile)
+	{
+		System.out.println("Operation performed");
+		ContentValues values = new ContentValues();
+		values.put(DBTableContract.Profile.COLUMN_NAME_NAME, profile.getPersonName());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AGE, profile.getPersonAge());
+		values.put(DBTableContract.Profile.COLUMN_NAME_HEIGHT, profile.getHeight());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT, profile.getWeight());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH, profile.getWeightManageHighHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, profile.getWeightManageLowHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
+		database.update(DBTableContract.Profile.TABLE_NAME, values, null, null);
 	}
 	public void deleteProfile(ProfileDTO profile)
 	{
@@ -89,7 +96,7 @@ public class DBOperateDAO {
 		 cursor.close();
 		 return profiles;
 	}
-	public WorkoutDTO CreateWorkout(WorkoutDTO workout)
+	public void CreateWorkout(WorkoutDTO workout)
 	{
 		ContentValues values = new ContentValues();
 		values.put(DBTableContract.Workout.COLUMN_NAME_ID, workout.getId());
@@ -103,14 +110,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES, workout.getBurnedCalories());
 		values.put(DBTableContract.Workout.COLUMN_NAME_DISTANCE, workout.getDistance());
 		values.put(DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, workout.getWorkoutType());
-		long newRowId = database.insert(DBTableContract.Workout.TABLE_NAME, null, values);
-		Cursor cursor = database.query(DBTableContract.Workout.TABLE_NAME,
-		        workoutColumns, DBTableContract.Workout.COLUMN_NAME_ID + " = " + newRowId, null,
-		        null, null, null);
-		cursor.moveToFirst();
-		WorkoutDTO newWorkOut = cursorToWorkout(cursor);
-		cursor.close();
-		return newWorkOut;
+		database.insert(DBTableContract.Workout.TABLE_NAME, null, values);
 	}
 	public void deleteWorkout(WorkoutDTO workout)
 	{
