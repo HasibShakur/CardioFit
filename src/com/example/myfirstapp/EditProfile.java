@@ -7,6 +7,7 @@ import com.example.DBConnection.ProfileDTO;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +18,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 
 public class EditProfile extends Activity {
+	private static final String TAG = "EditProfile";
 	//create the DAO class reference 
 	private DBOperateDAO operatorDao;
 	private EditText nameText, ageText, weightText, heightFtText, heightInText, heartRateHighText, heartRateLowText;
@@ -33,7 +35,10 @@ public class EditProfile extends Activity {
 		//open Database connection
 		operatorDao.openDatabase();
 		
-		//Get the items from view 
+		//Get the items from view & set their initial values (if they exist)
+		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
+		profiles = operatorDao.getAllProfiles();
+
 		nameText = (EditText) findViewById(R.id.editTextName);
 		ageText = (EditText) findViewById(R.id.editTextAge);
 		weightText = (EditText) findViewById(R.id.editTextWeight);
@@ -41,11 +46,33 @@ public class EditProfile extends Activity {
 		heightInText = (EditText) findViewById(R.id.editTextHeightIn);
 		heartRateHighText = (EditText) findViewById(R.id.editTextHeartRateHigh);
 		heartRateLowText = (EditText) findViewById(R.id.editTextHeartRateLow);
+		
+		Log.i(TAG, "" + profiles.size());
+		
+		if (!(profiles.size() < 1)) {
+			nameText.setText(profiles.get(0).getPersonName());
+			ageText.setText("" + profiles.get(0).getPersonAge());
+			weightText.setText("" +profiles.get(0).getWeight());
+			
+			double height = profiles.get(0).getHeight();
+			height = height/.0254;
+			double height_ft = height/12;
+			int height_ft_int = (int) height_ft;
+			double height_in = height % 12;
+			int height_in_int = (int) height_in;
+					
+			heightFtText.setText("" + height_ft_int);
+			heightInText.setText("" + height_in_int);
+			
+		}
+		
+		
 		saveButton = (Button) findViewById(R.id.buttonSaveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// do the saving operation here
+				
 				String userName = nameText.getText().toString();
 				String age = ageText.getText().toString();
 				String weight = weightText.getText().toString();
@@ -97,17 +124,17 @@ public class EditProfile extends Activity {
 				profile.setAerobicHighHeartRate(heartHigh);
 				profile.setAerobicLowHeartRate(heartLow);
 				
-				operatorDao.createProfile(profile);
-				Toast.makeText(getApplicationContext(), "Profile Created Successfully", Toast.LENGTH_LONG).show(); 
+				ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
+				profiles = operatorDao.getAllProfiles();
 				
-				//test
-				ArrayList<ProfileDTO> test = new ArrayList<ProfileDTO>();
-				test = operatorDao.getAllProfiles();
-				System.out.println(test.size());
-				for(int i=0;i<test.size();i++)
-				{
-					System.out.println(test.get(i).getPersonId()+ "     "+test.get(i).getPersonName());
+				if (!(profiles.size() < 1)) {
+					operatorDao.updateProfile(profile);
+					Toast.makeText(getApplicationContext(), "Profile Updated Successfully", Toast.LENGTH_LONG).show(); 
+				} else {
+					operatorDao.createProfile(profile);
+					Toast.makeText(getApplicationContext(), "Profile Created Successfully", Toast.LENGTH_LONG).show(); 
 				}
+				
 			}
 		});
 	}
