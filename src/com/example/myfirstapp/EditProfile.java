@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.SuppressLint;
@@ -129,16 +130,16 @@ public class EditProfile extends Activity {
 				profiles = operatorDao.getAllProfiles();
 				
 				if (!(profiles.size() < 1)) {
-					operatorDao.updateProfile(profile);
+					//operatorDao.updateProfile(profile);
 					Toast.makeText(getApplicationContext(), "Profile Updated Successfully", Toast.LENGTH_LONG).show(); 
 				} else {
 					operatorDao.createProfile(profile);
 					Toast.makeText(getApplicationContext(), "Profile Created Successfully", Toast.LENGTH_LONG).show(); 
 				}
-				
 			}
-		});
+        });
 	}
+
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
