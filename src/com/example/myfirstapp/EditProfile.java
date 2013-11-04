@@ -130,7 +130,7 @@ public class EditProfile extends Activity {
 				profiles = operatorDao.getAllProfiles();
 				
 				if (!(profiles.size() < 1)) {
-					//operatorDao.updateProfile(profile);
+					operatorDao.updateProfile(profile);
 					Toast.makeText(getApplicationContext(), "Profile Updated Successfully", Toast.LENGTH_LONG).show(); 
 				} else {
 					operatorDao.createProfile(profile);
