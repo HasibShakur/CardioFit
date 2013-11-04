@@ -22,14 +22,26 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
+
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 
 /**
@@ -38,7 +50,7 @@ import android.util.Log;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
+public class BluetoothChatService extends Service{
     // Debugging
     private static final String TAG = "BluetoothChatService";
     private static final boolean D = true;
@@ -65,6 +77,45 @@ public class BluetoothChatService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
+    private PowerManager.WakeLock wakeLock;
+    private NotificationManager mNM;
+    
+    /**
+     * Class for clients to access.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with
+     * IPC.
+     */
+    public class HeartRateBinder extends Binder {
+        BluetoothChatService getService() {
+            return BluetoothChatService.this;
+        }
+    }
+
+    
+    
+    @Override
+    public void onCreate() {
+        Log.i(TAG, "[SERVICE] onCreate");
+        super.onCreate();        
+    }
+    
+    @Override
+    public void onStart(Intent intent, int startId) {
+        Log.i(TAG, "[SERVICE] onStart");
+        super.onStart(intent, startId);
+    }
+    
+    @Override
+    public void onDestroy() {
+    	Log.i(TAG, "[SERVICE] onDestroy");
+    	super.onDestroy();
+        mNM.cancel(R.string.app_name);
+
+    }
+
+
+    
+    
     /**
      * Constructor. Prepares a new BluetoothChat session.
      * @param context  The UI Activity Context
@@ -170,6 +221,8 @@ public class BluetoothChatService {
         mHandler.sendMessage(msg);
 
         setState(STATE_CONNECTED);
+        
+        
     }
 
     /**
@@ -473,4 +526,41 @@ public class BluetoothChatService {
             }
         }
     }
+
+	@Override
+	public IBinder onBind(Intent intent) {
+        Log.i(TAG, "[SERVICE] onBind");
+        return mBinder;
+	}
+	
+    private final IBinder mBinder = new HeartRateBinder();
+
+    // BroadcastReceiver for handling ACTION_SCREEN_OFF.
+    /*
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Check action just to be on the safe side.
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                // Unregisters the listener and registers it again.
+                BluetoothChatService.this.unregisterDetector();
+                StepService.this.registerDetector();
+                if (mPedometerSettings.wakeAggressively()) {
+                    wakeLock.release();
+                    acquireWakeLock();
+                }
+            }
+        }
+    };
+    */
+
+    private void acquireWakeLock() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        int wakeFlags;
+        wakeFlags = PowerManager.PARTIAL_WAKE_LOCK;
+        
+        wakeLock = pm.newWakeLock(wakeFlags, TAG);
+        wakeLock.acquire();
+    }
+    
 }

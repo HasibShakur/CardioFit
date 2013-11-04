@@ -41,7 +41,7 @@
     <string name="insecure_connect">Connect a device - Insecure</string>
     <string name="discoverable">Make discoverable</string>
     
-    <string name="notification_subtitle">Counting your steps</string>
+    <string name="notification_subtitle">Tracking your workout</string>
 
     <string name="started">Pedometer started.</string>
     <string name="stopped">Pedometer stopped.</string>
