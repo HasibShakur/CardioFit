@@ -14,7 +14,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This is the main class for database operation.
  * It inserts value to the profile and workout class, deletes values from them and performs update
  * operation on them
@@ -60,6 +60,20 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
 		database.insert(DBTableContract.Profile.TABLE_NAME, null, values);
+	}
+	public void updateProfile(ProfileDTO profile)
+	{
+		System.out.println("Operation performed");
+		ContentValues values = new ContentValues();
+		values.put(DBTableContract.Profile.COLUMN_NAME_NAME, profile.getPersonName());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AGE, profile.getPersonAge());
+		values.put(DBTableContract.Profile.COLUMN_NAME_HEIGHT, profile.getHeight());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT, profile.getWeight());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH, profile.getWeightManageHighHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, profile.getWeightManageLowHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
+		database.update(DBTableContract.Profile.TABLE_NAME, values, null, null);
 	}
 	public void deleteProfile(ProfileDTO profile)
 	{

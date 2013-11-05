@@ -92,45 +92,12 @@
         android:hint="@string/in"
         android:inputType="number"
         android:paddingRight="50dip" />
-    
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editTextHeightFt"
-        android:text="@string/highHeartRate" />
-    
-    <EditText
-        android:id="@+id/editTextHeartRateHigh"
-        android:layout_width="50dip"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView5"
-        android:ems="10"
-        android:hint="@string/highHeartRate"
-        android:inputType="number" />
-
-    <TextView
-        android:id="@+id/textView6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editTextHeartRateHigh"
-        android:text="@string/lowHeartRate" />
-    <EditText
-        android:id="@+id/editTextHeartRateLow"
-        android:layout_width="50dip"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView6"
-        android:ems="10"
-        android:hint="@string/lowHeartRate"
-        android:inputType="number" />
 
     <Button
         android:id="@+id/buttonSaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editTextHeartRateLow"
+        android:layout_below="@+id/editTextHeightFt"
         android:layout_marginTop="26dp"
         android:layout_toRightOf="@+id/textView4"
         android:onClick="onClick"

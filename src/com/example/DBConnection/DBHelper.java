@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This class creates the database tables and drops them
  */
 public class DBHelper extends SQLiteOpenHelper{

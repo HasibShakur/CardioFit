@@ -4,7 +4,7 @@
 package com.example.DBConnection;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This is the profile class
  * All operations on profile table are to be done through this class
  */

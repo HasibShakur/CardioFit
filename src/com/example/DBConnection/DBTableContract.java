@@ -6,7 +6,7 @@ package com.example.DBConnection;
 import android.provider.BaseColumns;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This class contains the schema of the database
  * Each inner class represents a separate table
  */
