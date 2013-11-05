@@ -18,6 +18,9 @@ package com.example.myfirstapp;
 
 import java.util.ArrayList;
 
+import com.example.DBConnection.DBOperateDAO;
+import com.example.DBConnection.ProfileDTO;
+
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -56,6 +59,7 @@ public class Workout extends Activity implements OnInitListener {
     private static boolean voice_on = true;
     private static final int VOICE_OFF = 9;
     private static final int VOICE_ON = 8;
+    private static final int secure_connect_scan = 7;
 
 	 // Debugging
     private static final String TAG = "Workout";
@@ -67,9 +71,12 @@ public class Workout extends Activity implements OnInitListener {
     long timeWhenClicked = 0;
     boolean isChronometerRunning = false;
 
-    
+    //TextViews
     private TextView mWorkoutType;
-
+    private TextView mHeartRate;
+    private TextView mHeartRange;
+    
+	private DBOperateDAO operatorDao;
 
 
 	public final static String WORKOUT_TYPE = "com.example.myfirstapp.MESSAGE";
@@ -93,14 +100,14 @@ public class Workout extends Activity implements OnInitListener {
 
     private String mConnectedDeviceName = null;
     private ArrayAdapter<String> mConversationArrayAdapter;
-    private TextView mHeartRate;
-    private TextView mHeartRange;
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothChatService mChatService = null;
     
     
     private ArrayList<Integer> heartRates = new ArrayList<Integer>();
     private ArrayList<Integer> tempHeartRates = new ArrayList<Integer>();
+    public static int heart_range_low;
+    public static int heart_range_high;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -130,6 +137,25 @@ public class Workout extends Activity implements OnInitListener {
         
         mWorkoutType = (TextView) findViewById(R.id.workout_type);
         mWorkoutType.setText(workout_type);
+        
+        //create the DAO class object here
+		operatorDao = new DBOperateDAO(this);
+		//open Database connection
+		operatorDao.openDatabase();
+		
+		//Get the items from view & set their initial values (if they exist)
+		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
+		profiles = operatorDao.getAllProfiles();
+		
+		if ((profiles.size() < 1)) {
+			Intent edit_profile_intent = new Intent(this, EditProfile.class);
+			startActivity(edit_profile_intent);
+		} else {
+	        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
+	        heart_range_low = profiles.get(0).getAerobicLowHeartRate();
+	        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
+	        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
+		}
         
 
 	}
@@ -188,11 +214,13 @@ public class Workout extends Activity implements OnInitListener {
         
         // Stop the Bluetooth chat services
         if (mChatService != null) mChatService.stop();
+        tts.shutdown();
+
     }
     
     protected void onRestart() {
         Log.i(TAG, "[ACTIVITY] onRestart");
-        super.onDestroy();
+        super.onRestart();
     }
     
     private void setupChat() {
@@ -224,7 +252,6 @@ public class Workout extends Activity implements OnInitListener {
         @Override
         public void handleMessage(Message msg) {
             mHeartRate = (TextView) findViewById(R.id.heart_rate);
-            mHeartRange = (TextView) findViewById(R.id.heart_range_value);
             mChronometer = (Chronometer) findViewById(R.id.chronometer);
 
             switch (msg.what) {
@@ -241,13 +268,11 @@ public class Workout extends Activity implements OnInitListener {
                 case BluetoothChatService.STATE_CONNECTING:
                     setStatus(R.string.title_connecting);
                     mHeartRate.setText("");
-                    mHeartRange.setText("");
                     break;
                 case BluetoothChatService.STATE_LISTEN:
                 case BluetoothChatService.STATE_NONE:
                     setStatus(R.string.title_not_connected);       
                     mHeartRate.setText("Please connect heart monitor");
-                    mHeartRange.setText("N/A");
                     if (service_is_running) {
                     	mNM.cancel(R.string.app_name);
                     	service_is_running = false;
@@ -259,9 +284,10 @@ public class Workout extends Activity implements OnInitListener {
             	byte[] readBuf = null;
             	readBuf = (byte[]) msg.obj;         
             	
-            	String Value = byteToHex(readBuf[13]);
+            	//String Value = byteToHex(readBuf[1]);
+            	//String Value2 = byte2hex(readBuf);
+                String Value = parseBioharnessPacket(readBuf);
             	Log.i(TAG, Value);
-                //String Value = parseBioharnessPacket(readBuf);
                 int heart_rate = Integer.parseInt(Value, 16);
                 
                 
@@ -283,16 +309,16 @@ public class Workout extends Activity implements OnInitListener {
 
                 }
                 
-                if (avg <= 65 && avg != 0 && voice_on == true) {
+                if (avg <= heart_range_low && avg != 0 && voice_on == true) {
             		tts.speak("Heart Rate Too Low", TextToSpeech.QUEUE_ADD, null);
                 }
-                if (avg >= 85 && voice_on == true) {
+                if (avg >= heart_range_high && voice_on == true) {
             		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
                 }
                 
-                if (heart_rate <= 65) {
+                if (heart_rate <= heart_range_low) {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
-                } else if (heart_rate >= 85) {
+                } else if (heart_rate >= heart_range_high) {
                 	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
                 } else {
                 	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
@@ -393,7 +419,7 @@ public class Workout extends Activity implements OnInitListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent serverIntent = null;
         switch (item.getItemId()) {
-        case R.id.secure_connect_scan:
+        case secure_connect_scan:
             // Launch the DeviceListActivity to see devices and do scan
             serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
@@ -422,6 +448,9 @@ public class Workout extends Activity implements OnInitListener {
         	.setIcon(android.R.drawable.ic_lock_power_off)
         	.setShortcut('9', 'q');
         }
+        menu.add(0, secure_connect_scan, 0, R.string.secure_connect)
+        .setIcon(android.R.drawable.ic_menu_search)
+        .setShortcut('9', 'q');
         return true;
     }
     
@@ -511,6 +540,14 @@ public class Workout extends Activity implements OnInitListener {
 			isChronometerRunning = false;
 		}
 		timeWhenClicked = 0;
+	}
+	
+	public void saveWorkout (View view) {
+		//TODO: method to save workout data to database
+	}
+	
+	public void discardWorkout (View view) {
+		//TODO: method to discard data and return to previous screen
 	}
 	
 	

@@ -149,33 +149,6 @@
 		    android:textSize="40sp"
 		    android:textColor="@color/green" />
 
-		<LinearLayout
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:gravity="center"
-		    android:orientation="horizontal" >
-
-		    <Button
-		        android:id="@+id/start_button"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:onClick="startTimer"
-		        android:text="@string/Start" />
-
-		    <Button
-		        android:id="@+id/stop_button"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:onClick="stopTimer"
-		        android:text="@string/Stop" />
-
-		    <Button
-		        android:id="@+id/resume_button"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:onClick="resetTimer"
-		        android:text="@string/Reset" />
-		</LinearLayout>
 
 		<LinearLayout
 		    android:layout_width="fill_parent"
@@ -187,13 +160,15 @@
 		    android:id="@+id/Save_Workout_Button"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="@string/save_workout" />
+		    android:text="@string/save_workout" 
+		    android:onClick="SaveWorkout"/>
 			
 			<Button
 		    android:id="@+id/discard_workout_button"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="@string/discard_workout" />
+		    android:text="@string/discard_workout"
+		    android:onClick="DiscardWorkout" />
 			
 		</LinearLayout>
 		

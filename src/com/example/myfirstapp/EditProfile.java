@@ -46,8 +46,6 @@ public class EditProfile extends Activity {
 		weightText = (EditText) findViewById(R.id.editTextWeight);
 		heightFtText = (EditText) findViewById(R.id.editTextHeightFt);
 		heightInText = (EditText) findViewById(R.id.editTextHeightIn);
-		heartRateHighText = (EditText) findViewById(R.id.editTextHeartRateHigh);
-		heartRateLowText = (EditText) findViewById(R.id.editTextHeartRateLow);
 		
 		Log.i(TAG, "" + profiles.size());
 		
@@ -80,8 +78,6 @@ public class EditProfile extends Activity {
 				String weight = weightText.getText().toString();
 				String heightFt = heightFtText.getText().toString();
 				String heightIn = heightInText.getText().toString();
-				String heartRateHigh = heartRateHighText.getText().toString();
-				String heartRateLow = heartRateLowText.getText().toString();
 				ProfileDTO profile  = new ProfileDTO();
 				if(userName == null || userName.isEmpty())
 				{
@@ -103,28 +99,25 @@ public class EditProfile extends Activity {
 					Toast.makeText(getApplicationContext(), "Height is provided", Toast.LENGTH_LONG).show(); 
 					return;
 				}
-				if(heartRateHigh == null || heartRateHigh.isEmpty())
-				{
-					Toast.makeText(getApplicationContext(), "High Heart Rate  not provided", Toast.LENGTH_LONG).show(); 
-					return;
-				}
-				if(heartRateLow == null || heartRateLow.isEmpty())
-				{
-					Toast.makeText(getApplicationContext(), "Low Heart Rate  not provided", Toast.LENGTH_LONG).show(); 
-					return;
-				}
 				profile.setPersonName(userName.trim());
 				profile.setPersonAge(Integer.parseInt(age.trim()));
 				profile.setWeight(Double.parseDouble(weight.trim()));
 				double ft = Double.parseDouble(heightFt.trim());
 				double in = Double.parseDouble(heightIn.trim());
 				profile.setHeight(((ft*12)+in)*0.0254);
-				int heartHigh = Integer.parseInt(heartRateHigh.trim());
-				int heartLow = Integer.parseInt(heartRateLow.trim());
-				profile.setWeightManageHighHeartRate(heartHigh);
-				profile.setWeightManageLowHeartRate(heartLow);
-				profile.setAerobicHighHeartRate(heartHigh);
-				profile.setAerobicLowHeartRate(heartLow);
+				
+				double heartHigh = 220 - Integer.parseInt(age);
+				double aerobicLow = heartHigh * .7;
+				double aerobicHigh = heartHigh * .8;
+				double weightLow = heartHigh * .6;
+				double weightHigh = heartHigh * .7;
+				
+				//int heartHigh = Integer.parseInt(heartRateHigh.trim());
+				//int heartLow = Integer.parseInt(heartRateLow.trim());
+				profile.setWeightManageHighHeartRate((int) weightHigh);
+				profile.setWeightManageLowHeartRate((int) weightLow);
+				profile.setAerobicHighHeartRate((int) aerobicHigh);
+				profile.setAerobicLowHeartRate((int) aerobicLow);
 				
 				ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 				profiles = operatorDao.getAllProfiles();
