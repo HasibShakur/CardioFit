@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.SuppressLint;
@@ -35,7 +37,7 @@ public class EditProfile extends Activity {
 		operatorDao = new DBOperateDAO(this);
 		//open Database connection
 		operatorDao.openDatabase();
-		
+
 		//Get the items from view & set their initial values (if they exist)
 		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 		profiles = operatorDao.getAllProfiles();
@@ -64,50 +66,7 @@ public class EditProfile extends Activity {
 			heightInText.setText("" + height_in_int);
 			
 		}
-		
-		
-		
-		Log.i(TAG, "" + profiles.size());
-		
-		if (!(profiles.size() < 1)) {
-			nameText.setText(profiles.get(0).getPersonName());
-			ageText.setText("" + profiles.get(0).getPersonAge());
-			weightText.setText("" +profiles.get(0).getWeight());
-			
-			double height = profiles.get(0).getHeight();
-			height = height/.0254;
-			double height_ft = height/12;
-			int height_ft_int = (int) height_ft;
-			double height_in = height % 12;
-			int height_in_int = (int) height_in;
-					
-			heightFtText.setText("" + height_ft_int);
-			heightInText.setText("" + height_in_int);
-			
-		}
-		
-		
-		
-		Log.i(TAG, "" + profiles.size());
-		
-		if (!(profiles.size() < 1)) {
-			nameText.setText(profiles.get(0).getPersonName());
-			ageText.setText("" + profiles.get(0).getPersonAge());
-			weightText.setText("" +profiles.get(0).getWeight());
-			
-			double height = profiles.get(0).getHeight();
-			height = height/.0254;
-			double height_ft = height/12;
-			int height_ft_int = (int) height_ft;
-			double height_in = height % 12;
-			int height_in_int = (int) height_in;
-					
-			heightFtText.setText("" + height_ft_int);
-			heightInText.setText("" + height_in_int);
-			
-		}
-		
-		
+				
 		saveButton = (Button) findViewById(R.id.buttonSaveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -146,6 +105,7 @@ public class EditProfile extends Activity {
 				double ft = Double.parseDouble(heightFt.trim());
 				double in = Double.parseDouble(heightIn.trim());
 				profile.setHeight(((ft*12)+in)*0.0254);
+
 				profile.setWeightManageHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
 				profile.setWeightManageLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
 				profile.setAerobicHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
@@ -163,8 +123,9 @@ public class EditProfile extends Activity {
 				}
 				
 			}
-		});
+        });
 	}
+
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

@@ -22,14 +22,26 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
+
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.util.Log;
 
 /**
@@ -38,25 +50,23 @@ import android.util.Log;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
+public class BluetoothChatService extends Service{
     // Debugging
     private static final String TAG = "BluetoothChatService";
     private static final boolean D = true;
 
     // Name for the SDP record when creating server socket
     private static final String NAME_SECURE = "BluetoothChatSecure";
-    //private static final String NAME_INSECURE = "BluetoothChatInsecure";
+    private static final String NAME_INSECURE = "BluetoothChatInsecure";
 
     // Unique UUID for this application
     private static final UUID MY_UUID_SECURE =
         UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    //private static final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     // Member fields
     private final BluetoothAdapter mAdapter;
     private final Handler mHandler;
     private AcceptThread mSecureAcceptThread;
-    //private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
@@ -67,6 +77,45 @@ public class BluetoothChatService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
+    private PowerManager.WakeLock wakeLock;
+    private NotificationManager mNM;
+    
+    /**
+     * Class for clients to access.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with
+     * IPC.
+     */
+    public class HeartRateBinder extends Binder {
+        BluetoothChatService getService() {
+            return BluetoothChatService.this;
+        }
+    }
+
+    
+    
+    @Override
+    public void onCreate() {
+        Log.i(TAG, "[SERVICE] onCreate");
+        super.onCreate();        
+    }
+    
+    @Override
+    public void onStart(Intent intent, int startId) {
+        Log.i(TAG, "[SERVICE] onStart");
+        super.onStart(intent, startId);
+    }
+    
+    @Override
+    public void onDestroy() {
+    	Log.i(TAG, "[SERVICE] onDestroy");
+    	super.onDestroy();
+        mNM.cancel(R.string.app_name);
+
+    }
+
+
+    
+    
     /**
      * Constructor. Prepares a new BluetoothChat session.
      * @param context  The UI Activity Context
@@ -87,7 +136,7 @@ public class BluetoothChatService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(StartWorkout.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(Workout.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -112,13 +161,9 @@ public class BluetoothChatService {
 
         // Start the thread to listen on a BluetoothServerSocket
         if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread();
+            mSecureAcceptThread = new AcceptThread(true);
             mSecureAcceptThread.start();
         }
-      /*  if (mInsecureAcceptThread == null) {
-            mInsecureAcceptThread = new AcceptThread(false);
-            mInsecureAcceptThread.start();
-        }*/
     }
 
     /**
@@ -126,7 +171,7 @@ public class BluetoothChatService {
      * @param device  The BluetoothDevice to connect
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
-    public synchronized void connect(BluetoothDevice device) {
+    public synchronized void connect(BluetoothDevice device, boolean secure) {
         if (D) Log.d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
@@ -138,7 +183,7 @@ public class BluetoothChatService {
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device);
+        mConnectThread = new ConnectThread(device, secure);
         mConnectThread.start();
         setState(STATE_CONNECTING);
     }
@@ -169,13 +214,15 @@ public class BluetoothChatService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(Workout.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(StartWorkout.DEVICE_NAME, device.getName());
+        bundle.putString(Workout.DEVICE_NAME, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
         setState(STATE_CONNECTED);
+        
+        
     }
 
     /**
@@ -198,11 +245,7 @@ public class BluetoothChatService {
             mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
         }
-/*
-        if (mInsecureAcceptThread != null) {
-            mInsecureAcceptThread.cancel();
-            mInsecureAcceptThread = null;
-        } */
+
         setState(STATE_NONE);
     }
 
@@ -228,9 +271,9 @@ public class BluetoothChatService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(Workout.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(StartWorkout.TOAST, "Unable to connect device");
+        bundle.putString(Workout.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -243,9 +286,9 @@ public class BluetoothChatService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(StartWorkout.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(Workout.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(StartWorkout.TOAST, "Device connection was lost");
+        bundle.putString(Workout.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -263,13 +306,13 @@ public class BluetoothChatService {
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
 
-        public AcceptThread() {
+        public AcceptThread(boolean secure) {
             BluetoothServerSocket tmp = null;
-            mSocketType = "Secure";
+            mSocketType = secure ? "Secure":"Insecure";
 
             // Create a new listening server socket
             try {
-            	tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE,MY_UUID_SECURE);
+            	tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, MY_UUID_SECURE);
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "listen() failed", e);
             }
@@ -277,7 +320,8 @@ public class BluetoothChatService {
         }
 
         public void run() {
-            if (D) Log.d(TAG, "Socket Type: " + mSocketType + "BEGIN mAcceptThread" + this);
+            if (D) Log.d(TAG, "Socket Type: " + mSocketType +
+                    "BEGIN mAcceptThread" + this);
             setName("AcceptThread" + mSocketType);
 
             BluetoothSocket socket = null;
@@ -341,27 +385,20 @@ public class BluetoothChatService {
         private final BluetoothDevice mmDevice;
         private String mSocketType;
 
-        public ConnectThread(BluetoothDevice device) {
+        public ConnectThread(BluetoothDevice device, boolean secure) {
             mmDevice = device;
             BluetoothSocket tmp = null;
-            mSocketType = "Secure";
+            mSocketType = secure ? "Secure" : "Insecure";
+
+            // Get a BluetoothSocket for a connection with the
+            // given BluetoothDevice
+            Method m = null;
             try {
-			    tmp = mmDevice.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
-			    Method m = null;
-				try {
-					m = mmDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			    try {
-					tmp = (BluetoothSocket) m.invoke(mmDevice, 1);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} catch (IOException e) {
-			    Log.e(TAG, "create() failed", e);
-			}
+	        	 m = mmDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+	             tmp = (BluetoothSocket) m.invoke(mmDevice, 1);
+            } catch (Exception e) {
+                Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
+            }
             mmSocket = tmp;
         }
 
@@ -374,13 +411,10 @@ public class BluetoothChatService {
 
             // Make a connection to the BluetoothSocket
             try {
-            	Log.i("mmSocket = " , "" +  mmSocket);
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-                Log.i(TAG, "" + e);
-
                 // Close the socket
                 try {
                     mmSocket.close();
@@ -439,6 +473,7 @@ public class BluetoothChatService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
+
             byte[] buffer = new byte[1024];
             int bytes;
 
@@ -446,11 +481,13 @@ public class BluetoothChatService {
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-
+                    bytes = mmInStream.read(buffer); //This will throw an exception if we do not continually write
+                    
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(StartWorkout.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    mHandler.obtainMessage(Workout.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                    
+                    write(buffer);
+
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -459,6 +496,7 @@ public class BluetoothChatService {
                     break;
                 }
             }
+            
         }
 
         /**
@@ -467,11 +505,14 @@ public class BluetoothChatService {
          */
         public void write(byte[] buffer) {
             try {
-                mmOutStream.write(buffer);
+            	String message = "Received";
+                byte[] send = message.getBytes();
+
+                mmOutStream.write(send);
+        		mHandler.obtainMessage(Workout.MESSAGE_WRITE, -1, -1, send).sendToTarget();
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(StartWorkout.MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+                
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
@@ -485,4 +526,41 @@ public class BluetoothChatService {
             }
         }
     }
+
+	@Override
+	public IBinder onBind(Intent intent) {
+        Log.i(TAG, "[SERVICE] onBind");
+        return mBinder;
+	}
+	
+    private final IBinder mBinder = new HeartRateBinder();
+
+    // BroadcastReceiver for handling ACTION_SCREEN_OFF.
+    /*
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Check action just to be on the safe side.
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                // Unregisters the listener and registers it again.
+                BluetoothChatService.this.unregisterDetector();
+                StepService.this.registerDetector();
+                if (mPedometerSettings.wakeAggressively()) {
+                    wakeLock.release();
+                    acquireWakeLock();
+                }
+            }
+        }
+    };
+    */
+
+    private void acquireWakeLock() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        int wakeFlags;
+        wakeFlags = PowerManager.PARTIAL_WAKE_LOCK;
+        
+        wakeLock = pm.newWakeLock(wakeFlags, TAG);
+        wakeLock.acquire();
+    }
+    
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    
     <!--  WorkoutActivity -->
     <string name="Workout_Type">Workout Type:</string>
     <string name="heart_rate">heart rate</string>
@@ -8,6 +9,12 @@
     <string name="Start">Start</string>
     <string name="Stop">Stop</string>
     <string name="Reset">Reset</string>
+    <string name="discard_workout">Discard Workout</string>
+    <string name="save_workout">Save Workout</string>
+    <string name="turn_off_voice">Turn Off Voice Warnings</string>
+    <string name="voice_turned_off">Voice Warnings Turned Off</string>
+    <string name="turn_on_voice">Turn On Voice Warnings</string>
+    <string name="voice_turned_on">Voice Warnings Turned On</string>
     
     
     
@@ -34,7 +41,7 @@
     <string name="insecure_connect">Connect a device - Insecure</string>
     <string name="discoverable">Make discoverable</string>
     
-    <string name="notification_subtitle">Counting your steps</string>
+    <string name="notification_subtitle">Tracking your workout</string>
 
     <string name="started">Pedometer started.</string>
     <string name="stopped">Pedometer stopped.</string>
