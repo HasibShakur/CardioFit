@@ -87,6 +87,27 @@ public class EditProfile extends Activity {
 		}
 		
 		
+		
+		Log.i(TAG, "" + profiles.size());
+		
+		if (!(profiles.size() < 1)) {
+			nameText.setText(profiles.get(0).getPersonName());
+			ageText.setText("" + profiles.get(0).getPersonAge());
+			weightText.setText("" +profiles.get(0).getWeight());
+			
+			double height = profiles.get(0).getHeight();
+			height = height/.0254;
+			double height_ft = height/12;
+			int height_ft_int = (int) height_ft;
+			double height_in = height % 12;
+			int height_in_int = (int) height_in;
+					
+			heightFtText.setText("" + height_ft_int);
+			heightInText.setText("" + height_in_int);
+			
+		}
+		
+		
 		saveButton = (Button) findViewById(R.id.buttonSaveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
 			@Override
