@@ -92,7 +92,6 @@
         android:hint="@string/in"
         android:inputType="number"
         android:paddingRight="50dip" />
-  
 
     <Button
         android:id="@+id/buttonSaveButton"

@@ -14,7 +14,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This is the main class for database operation.
  * It inserts value to the profile and workout class, deletes values from them and performs update
  * operation on them
@@ -60,8 +60,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
 		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
 		database.insert(DBTableContract.Profile.TABLE_NAME, null, values);
-	}
-	
+	}	
 	public void updateProfile(ProfileDTO profile)
 	{
 		System.out.println("Operation performed");

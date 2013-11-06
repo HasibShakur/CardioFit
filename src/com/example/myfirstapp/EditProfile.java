@@ -23,8 +23,9 @@ public class EditProfile extends Activity {
 	private static final String TAG = "EditProfile";
 	//create the DAO class reference 
 	private DBOperateDAO operatorDao;
-	private EditText nameText, ageText, weightText, heightFtText, heightInText, heartRateHighText, heartRateLowText;
+	private EditText nameText, ageText, weightText, heightFtText, heightInText;
 	private Button saveButton;
+	private Util util = new Util();
 	
 	@SuppressLint("NewApi")
 	@Override
@@ -36,7 +37,7 @@ public class EditProfile extends Activity {
 		operatorDao = new DBOperateDAO(this);
 		//open Database connection
 		operatorDao.openDatabase();
-		
+
 		//Get the items from view & set their initial values (if they exist)
 		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 		profiles = operatorDao.getAllProfiles();
@@ -65,8 +66,7 @@ public class EditProfile extends Activity {
 			heightInText.setText("" + height_in_int);
 			
 		}
-		
-		
+				
 		saveButton = (Button) findViewById(R.id.buttonSaveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -105,19 +105,11 @@ public class EditProfile extends Activity {
 				double ft = Double.parseDouble(heightFt.trim());
 				double in = Double.parseDouble(heightIn.trim());
 				profile.setHeight(((ft*12)+in)*0.0254);
-				
-				double heartHigh = 220 - Integer.parseInt(age);
-				double aerobicLow = heartHigh * .7;
-				double aerobicHigh = heartHigh * .8;
-				double weightLow = heartHigh * .6;
-				double weightHigh = heartHigh * .7;
-				
-				//int heartHigh = Integer.parseInt(heartRateHigh.trim());
-				//int heartLow = Integer.parseInt(heartRateLow.trim());
-				profile.setWeightManageHighHeartRate((int) weightHigh);
-				profile.setWeightManageLowHeartRate((int) weightLow);
-				profile.setAerobicHighHeartRate((int) aerobicHigh);
-				profile.setAerobicLowHeartRate((int) aerobicLow);
+
+				profile.setWeightManageHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
+				profile.setWeightManageLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
+				profile.setAerobicHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
+				profile.setAerobicLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
 				
 				ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 				profiles = operatorDao.getAllProfiles();
@@ -129,6 +121,7 @@ public class EditProfile extends Activity {
 					operatorDao.createProfile(profile);
 					Toast.makeText(getApplicationContext(), "Profile Created Successfully", Toast.LENGTH_LONG).show(); 
 				}
+				
 			}
         });
 	}

@@ -7,7 +7,7 @@ import java.sql.Time;
 import java.util.Date;
 
 /**
- * @author Ayon
+ * @author Hasib Shakur
  * This is the workout class
  * All operations on the workout table are to be done through this class
  */
