@@ -104,7 +104,7 @@ public class EditProfile extends Activity {
 				profile.setWeight(Double.parseDouble(weight.trim()));
 				double ft = Double.parseDouble(heightFt.trim());
 				double in = Double.parseDouble(heightIn.trim());
-				profile.setHeight(((ft*12)+in)*0.0254);
+				profile.setHeight((ft*12)+in);
 
 				profile.setWeightManageHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
 				profile.setWeightManageLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));

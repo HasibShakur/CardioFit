@@ -31,7 +31,7 @@ public class DBOperateDAO {
 	private String[] workoutColumns = { DBTableContract.Workout.COLUMN_NAME_ID , DBTableContract.Workout.COLUMN_NAME_PROFILE_ID, DBTableContract.Workout.COLUMN_NAME_DATE,
 			DBTableContract.Workout.COLUMN_NAME_START_TIME, DBTableContract.Workout.COLUMN_NAME_END_TIME,
 			DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW,
-			DBTableContract.Workout.COLUMN_NAME_AVERAGE_HEART_RATE, DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES,
+			DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES,
 			DBTableContract.Workout.COLUMN_NAME_DISTANCE, DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE
 	};
 	
@@ -99,14 +99,12 @@ public class DBOperateDAO {
 	public void CreateWorkout(WorkoutDTO workout)
 	{
 		ContentValues values = new ContentValues();
-		values.put(DBTableContract.Workout.COLUMN_NAME_ID, workout.getId());
 		values.put(DBTableContract.Workout.COLUMN_NAME_PROFILE_ID, workout.getProfileId());
 		values.put(DBTableContract.Workout.COLUMN_NAME_DATE, workout.getWorkoutDate().toString());
 		values.put(DBTableContract.Workout.COLUMN_NAME_START_TIME, workout.getWorkoutStart().toString());
 		values.put(DBTableContract.Workout.COLUMN_NAME_END_TIME, workout.getWorkoutEnd().toString());
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, workout.getHighHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW, workout.getLowHeartRate());
-		values.put(DBTableContract.Workout.COLUMN_NAME_AVERAGE_HEART_RATE, workout.getAverageHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES, workout.getBurnedCalories());
 		values.put(DBTableContract.Workout.COLUMN_NAME_DISTANCE, workout.getDistance());
 		values.put(DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, workout.getWorkoutType());
@@ -167,10 +165,9 @@ public class DBOperateDAO {
 		w.setWorkoutEnd(new Time(end));
 		w.setHighHeartRate(c.getInt(5));
 		w.setLowHeartRate(c.getInt(6));
-		w.setAverageHeartRate(c.getInt(7));
-		w.setBurnedCalories(c.getDouble(8));
-		w.setDistance(c.getDouble(9));
-		w.setWorkoutType(c.getString(10));
+		w.setBurnedCalories(c.getDouble(7));
+		w.setDistance(c.getDouble(8));
+		w.setWorkoutType(c.getString(9));
 		return w;
 		
 	}

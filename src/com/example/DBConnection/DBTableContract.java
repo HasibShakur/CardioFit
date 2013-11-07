@@ -42,7 +42,6 @@ public final class DBTableContract {
 		public static final String COLUMN_NAME_HEART_RATE_LOW = "heartRateLow";
 		public static final String COLUMN_NAME_DISTANCE = "distance";
 		public static final String COLUMN_NAME_BURNED_CALORIES = "calories";
-		public static final String COLUMN_NAME_AVERAGE_HEART_RATE = "averageHeartRateHigh";
 		public static final String COLUMN_NAME_WORKOUT_TYPE = "workoutType";
 	}
 }

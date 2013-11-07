@@ -16,10 +16,13 @@
 
 package com.example.myfirstapp;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import com.example.DBConnection.DBOperateDAO;
 import com.example.DBConnection.ProfileDTO;
+import com.example.DBConnection.WorkoutDTO;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -69,6 +72,8 @@ public class Workout extends Activity implements OnInitListener {
     //Timer
     private Chronometer mChronometer;
     long timeWhenClicked = 0;
+    long startTime = 0;
+    long endTime = 0;
     boolean isChronometerRunning = false;
 
     //TextViews
@@ -111,6 +116,9 @@ public class Workout extends Activity implements OnInitListener {
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
+    
+    private ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
+    WorkoutDTO workout = new WorkoutDTO();
 
     
     
@@ -144,7 +152,6 @@ public class Workout extends Activity implements OnInitListener {
 		operatorDao.openDatabase();
 		
 		//Get the items from view & set their initial values (if they exist)
-		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 		profiles = operatorDao.getAllProfiles();
 		
 		if ((profiles.size() < 1)) {
@@ -468,42 +475,7 @@ public class Workout extends Activity implements OnInitListener {
                     "Error occurred while initializing Text-To-Speech engine", Toast.LENGTH_LONG).show();
         }		
 	}
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-	public void playMusic(View view) {
+   public void playMusic(View view) {
 		@SuppressWarnings("deprecation")
 		Intent intent = new Intent(MediaStore.INTENT_ACTION_MUSIC_PLAYER);
 		startActivity(intent);
@@ -514,6 +486,7 @@ public class Workout extends Activity implements OnInitListener {
 			mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenClicked);
 			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
 			mChronometer.start();
+			startTime = System.currentTimeMillis(); 
 			isChronometerRunning = true;
             if (voice_on == true) {
             	tts.speak("Timer Started", TextToSpeech.QUEUE_ADD, null);
@@ -526,6 +499,7 @@ public class Workout extends Activity implements OnInitListener {
 		if (isChronometerRunning) {
 			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
 			mChronometer.stop();
+			endTime = System.currentTimeMillis();
 			isChronometerRunning = false;
             if (voice_on == true) {
             	tts.speak("Timer Stopped", TextToSpeech.QUEUE_ADD, null);
@@ -544,43 +518,28 @@ public class Workout extends Activity implements OnInitListener {
 	
 	public void saveWorkout (View view) {
 		//TODO: method to save workout data to database
+		profiles = operatorDao.getAllProfiles();
+		workout.setProfileId(profiles.get(0).getPersonId());
+		workout.setWorkoutDate(Calendar.getInstance().getTime());
+		workout.setWorkoutStart(new Time(startTime));
+		workout.setWorkoutEnd(new Time(endTime));
+		workout.setWorkoutType(mWorkoutType.getText().toString().trim());
+		workout.setHighHeartRate(heart_range_high);
+		workout.setLowHeartRate(heart_range_low);
+		
+		// for just now these are set to 0.0
+		workout.setBurnedCalories(0.0);
+		workout.setDistance(0.0);
+		operatorDao.CreateWorkout(workout);
+		Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
 	}
 	
 	public void discardWorkout (View view) {
 		//TODO: method to discard data and return to previous screen
+		operatorDao.deleteWorkout(workout);
+		Toast.makeText(getApplicationContext(), "Workout Data Deleted Successfully", Toast.LENGTH_LONG).show(); 	
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-    public String byte2hex(byte[] b){
+	public String byte2hex(byte[] b){
         // String Buffer can be used instead
         String hs = "";
         String stmp = "";
