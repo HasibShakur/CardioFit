@@ -56,7 +56,6 @@ public class EditProfile extends Activity {
 			weightText.setText("" +profiles.get(0).getWeight());
 			
 			double height = profiles.get(0).getHeight();
-			height = height/.0254;
 			double height_ft = height/12;
 			int height_ft_int = (int) height_ft;
 			double height_in = height % 12;
@@ -106,12 +105,10 @@ public class EditProfile extends Activity {
 				double in = Double.parseDouble(heightIn.trim());
 				profile.setHeight((ft*12)+in);
 
-				//profile.setHeight((ft*12)+in);
-
-				profile.setWeightManageHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
-				profile.setWeightManageLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
-				profile.setAerobicHighHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
-				profile.setAerobicLowHeartRate(util.getMaxHeartRate(profile.getPersonAge()));
+				profile.setWeightManageHighHeartRate(util.getWeightManageHighHeartRate(profile.getPersonAge()));
+				profile.setWeightManageLowHeartRate(util.getWeightManageLowHeartRate(profile.getPersonAge()));
+				profile.setAerobicHighHeartRate(util.getAerobicHighHeartRate(profile.getPersonAge()));
+				profile.setAerobicLowHeartRate(util.getAerobicLowHeartRate(profile.getPersonAge()));
 				
 				ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 				profiles = operatorDao.getAllProfiles();

@@ -227,7 +227,8 @@ public class Workout extends Activity implements OnInitListener {
         
         // Stop the Bluetooth chat services
         if (mChatService != null) mChatService.stop();
-        tts.shutdown();
+        
+        //tts.shutdown();
 
     }
     
@@ -348,6 +349,7 @@ public class Workout extends Activity implements OnInitListener {
         			mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenClicked);
         			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
         			mChronometer.start();
+        			startTime = System.currentTimeMillis(); 
         			isChronometerRunning = true;
         		}
                 
@@ -487,6 +489,7 @@ public class Workout extends Activity implements OnInitListener {
 		startActivity(intent);
 	}
 	
+   /*
 	public void startTimer(View view) {
 		if (!isChronometerRunning) {
 			mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenClicked);
@@ -521,7 +524,7 @@ public class Workout extends Activity implements OnInitListener {
 		}
 		timeWhenClicked = 0;
 	}
-		
+		*/
 	
 	
 	
@@ -552,6 +555,13 @@ public class Workout extends Activity implements OnInitListener {
 	
 	
     public void saveWorkout (View view) {
+    	
+    	//If the heart monitor was never attached --> can't save any information
+    	if (heartRates.size() == 0) {
+    		Toast.makeText(getApplicationContext(), "No workout data to save", Toast.LENGTH_LONG).show(); 
+    	}
+		endTime = System.currentTimeMillis();
+		
 		profiles = operatorDao.getAllProfiles();
 		workout.setProfileId(profiles.get(0).getPersonId());
 		workout.setWorkoutDate(Calendar.getInstance().getTime());
@@ -573,6 +583,17 @@ public class Workout extends Activity implements OnInitListener {
 		operatorDao.deleteWorkout(workout);
 		Toast.makeText(getApplicationContext(), "Workout Data Deleted Successfully", Toast.LENGTH_LONG).show(); 	
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public String byte2hex(byte[] b){
         // String Buffer can be used instead
         String hs = "";
