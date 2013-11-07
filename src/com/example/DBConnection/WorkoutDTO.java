@@ -19,7 +19,6 @@ public class WorkoutDTO {
 	private Time workoutEnd;
 	private int highHeartRate;
 	private int lowHeartRate;
-	private int averageHeartRate;
 	private double burnedCalories;
 	private double distance;
 	private String workoutType;
@@ -65,12 +64,6 @@ public class WorkoutDTO {
 	}
 	public void setLowHeartRate(int lowHeartRate) {
 		this.lowHeartRate = lowHeartRate;
-	}
-	public int getAverageHeartRate() {
-		return averageHeartRate;
-	}
-	public void setAverageHeartRate(int averageHeartRate) {
-		this.averageHeartRate = averageHeartRate;
 	}
 	public double getBurnedCalories() {
 		return burnedCalories;
