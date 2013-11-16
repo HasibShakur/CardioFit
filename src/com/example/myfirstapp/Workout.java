@@ -167,7 +167,9 @@ public class Workout extends Activity implements OnInitListener {
 		} else {
 	        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
 	        heart_range_low = profiles.get(0).getAerobicLowHeartRate();
+	        //heart_range_low = 65;
 	        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
+	        //heart_range_high = 85;
 	        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
 		}
         
@@ -223,6 +225,7 @@ public class Workout extends Activity implements OnInitListener {
 
     protected void onDestroy() {
         Log.i(TAG, "[ACTIVITY] onDestroy");
+        operatorDao.closeDatabase();
         super.onDestroy();
         
         // Stop the Bluetooth chat services
@@ -300,7 +303,8 @@ public class Workout extends Activity implements OnInitListener {
             	
             	//String Value = byteToHex(readBuf[1]);
             	//String Value2 = byte2hex(readBuf);
-                String Value = parseBioharnessPacket(readBuf);
+                //String Value = parseBioharnessPacket(readBuf);
+                String Value = Util.byteToHex(readBuf[13]);
             	Log.i(TAG, Value);
                 int heart_rate = Integer.parseInt(Value, 16);
                 
@@ -487,72 +491,7 @@ public class Workout extends Activity implements OnInitListener {
 		@SuppressWarnings("deprecation")
 		Intent intent = new Intent(MediaStore.INTENT_ACTION_MUSIC_PLAYER);
 		startActivity(intent);
-	}
-	
-   /*
-	public void startTimer(View view) {
-		if (!isChronometerRunning) {
-			mChronometer.setBase(SystemClock.elapsedRealtime() + timeWhenClicked);
-			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
-			mChronometer.start();
-			startTime = System.currentTimeMillis(); 
-			isChronometerRunning = true;
-            if (voice_on == true) {
-            	tts.speak("Timer Started", TextToSpeech.QUEUE_ADD, null);
-            }
-
-		}
-	}
-	
-	public void stopTimer (View view) {
-		if (isChronometerRunning) {
-			timeWhenClicked = mChronometer.getBase() - SystemClock.elapsedRealtime();
-			mChronometer.stop();
-			endTime = System.currentTimeMillis();
-			isChronometerRunning = false;
-            if (voice_on == true) {
-            	tts.speak("Timer Stopped", TextToSpeech.QUEUE_ADD, null);
-            }
-		}
-	}
-	
-	public void resetTimer (View view) {
-		mChronometer.setBase(SystemClock.elapsedRealtime());
-		if (isChronometerRunning) {
-			mChronometer.stop();
-			isChronometerRunning = false;
-		}
-		timeWhenClicked = 0;
-	}
-		*/
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	}	
 	
     public void saveWorkout (View view) {
     	
@@ -576,117 +515,16 @@ public class Workout extends Activity implements OnInitListener {
 		workout.setDistance(0.0);
 		operatorDao.CreateWorkout(workout);
 		Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
+		
 	}
 	
 	public void discardWorkout (View view) {
 		//TODO: method to discard data and return to previous screen
-		operatorDao.deleteWorkout(workout);
-		Toast.makeText(getApplicationContext(), "Workout Data Deleted Successfully", Toast.LENGTH_LONG).show(); 	
+		//operatorDao.deleteWorkout(workout);
+		//Toast.makeText(getApplicationContext(), "Workout Data Deleted Successfully", Toast.LENGTH_LONG).show(); 	
+		
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public String byte2hex(byte[] b){
-        // String Buffer can be used instead
-        String hs = "";
-        String stmp = "";
-
-        for (int n = 0; n < b.length; n++){
-           stmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
-
-           if (stmp.length() == 1){
-              hs = hs + "0" + stmp;
-           }
-           else{
-              hs = hs + stmp;
-           }
-           if (n < b.length - 1){
-              hs = hs + "";
-           }
-        }
-
-        return hs;
-     }
-  	public static String byteToHex(byte data) {
-  		StringBuffer buf = new StringBuffer();
-  		buf.append(toHexChar((data >>> 4) & 0x0F));
-  		buf.append(toHexChar(data & 0x0F));
-  		return buf.toString();
-  	}
-  	public static char toHexChar(int i) {
-  		if ((0 <= i) && (i <= 9))
-  			return (char) ('0' + i);
-  		else
-  			return (char) ('a' + (i - 10));
-  	}
-  	public static int merge(byte low, byte high) {
-  		int b = 0;
-  		b += (high << 8) + low;
-  		if ((high & 0x80) != 0) {
-  			b = -(0xffffffff - b);
-  		}
-  		return b;
-  	}
-  	public static String parseBioharnessPacket(byte[] packet) {
-
-  		String hrValue = null;
-  		String hrBytes = null;
-  		String batteryValue = null;
-  		String postureValue = null;
-  		String respirationValue = null;
-  		String tempValue = null;
-  		
-  		try {
-
-  			/** add packet type to avoid confusion with RR packets */
-  			// command.add(constants.KIND, DATA);
-  			//command.add(PrototypeFactory.beat, ZephyrUtils.parseString(packet, 3));
-  			
-  			hrBytes = byteToHex(packet[13]);
-  			//short hrtValue = Short.parseShort(hrBytes, 16);
-  			//command.add(PrototypeFactory.heart, Short.toString(hrValue));
-  			//hrValue = String.valueOf(hrtValue);
-  			//Log.i(TAG, "hrValue = " + hrValue);
-  			
-  			int v = merge(packet[24], packet[25]);
-  			//command.add(PrototypeFactory.battery, String.valueOf(((double) v / (double) 1000)));
-  			batteryValue = String.valueOf(((double) v / (double) 1000));
-  			//Log.i(TAG, "batteryValue = " + batteryValue);
-
-  			int p = merge(packet[18], packet[19]);
-  			//command.add(PrototypeFactory.posture, String.valueOf(((double) p / (double) 10)));
-  			postureValue = String.valueOf(((double) p / (double) 10));
-  			//Log.i(TAG, "posture value = " + postureValue);
-  			
-  			int r = merge(packet[14], packet[15]);
-  			//command.add(PrototypeFactory.respiration, String.valueof(Math.abs(((double) r / (double) 10))));
-  			respirationValue = String.valueOf(Math.abs(((double) r / (double) 10)));
-  			//Log.i(TAG, "respiration value = " + respirationValue);
-  			
-  			int t = merge(packet[16], packet[17]);
-  			//command.add(PrototypeFactory.temperature, String.valueOf(((double) t / (double) 10)));
-  			tempValue = String.valueOf(String.valueOf(((double) t / (double) 10)));
-  			//Log.i(TAG, "tempValue = " + tempValue);
-
-  		} catch (Exception e) {
-  			Log.i(TAG, "parseBioharnessPacket() : " + e.getMessage());
-  		}
-
-  		/** add other tags before sending ? */
-  		return hrBytes;
-  	}
-  	
-  	
-  	
-  	
   	/**
      * Show a notification while this service is running.
      */

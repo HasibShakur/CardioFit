@@ -161,7 +161,7 @@
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/save_workout" 
-		    android:onClick="SaveWorkout"/>
+		    android:onClick="saveWorkout"/>
 			
 			<Button
 		    android:id="@+id/discard_workout_button"

@@ -78,7 +78,6 @@ public class BluetoothChatService extends Service{
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
     private PowerManager.WakeLock wakeLock;
-    private NotificationManager mNM;
     
     /**
      * Class for clients to access.  Because we know this service always
@@ -109,8 +108,6 @@ public class BluetoothChatService extends Service{
     public void onDestroy() {
     	Log.i(TAG, "[SERVICE] onDestroy");
     	super.onDestroy();
-        mNM.cancel(R.string.app_name);
-
     }
 
 
