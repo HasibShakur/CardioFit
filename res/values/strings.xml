@@ -33,6 +33,7 @@
     <string name="title_workout">Workout</string>
     <string name="heart_rate">heart rate</string>
     <string name="heart_range">heart-rate range</string>
+    <string name="adjusted_heart_range">adjusted heart-rate range</string>
     <string name="chronometer_initial_format">Initial format:<xliff:g id="initial-format">%</xliff:g></string>
     <string name="discard_workout">Discard Workout</string>
     <string name="save_workout">Save Workout</string>

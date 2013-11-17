@@ -12,6 +12,8 @@ import android.widget.Spinner;
 
 public class StartWorkout extends Activity {
     public final static String WORKOUT_TYPE = "com.example.myfirstapp.MESSAGE";
+    public final static String HEART_RANGE_TYPE = "com.example.myirstapp.MESSAGE";
+    
 	private static final String TAG = "StartWorkout2";
 	
     // Message types sent from the BluetoothChatService Handler
@@ -73,9 +75,15 @@ public class StartWorkout extends Activity {
 	
 	public void startWorkout(View view) {
 		final Spinner workout_type_spinner = (Spinner) findViewById(R.id.workout_spinner);
+		final Spinner heart_range_type_spinner = (Spinner) findViewById(R.id.heartRange_spinner);
+		
 		Intent intent = new Intent(this, Workout.class);
+		
 		String workout_type = workout_type_spinner.getSelectedItem().toString();
 		intent.putExtra(WORKOUT_TYPE, workout_type);
+		
+		String heartRange_type = heart_range_type_spinner.getSelectedItem().toString();
+		intent.putExtra(HEART_RANGE_TYPE, heartRange_type);
 		startActivity(intent);
 	}
 }

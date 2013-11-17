@@ -130,6 +130,45 @@
        </LinearLayout>
        
    
+   <LinearLayout android:id="@+id/row_4"
+        android:orientation="horizontal" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:paddingBottom="@dimen/row_spacing"
+        android:baselineAligned="false">
+       
+       <LinearLayout
+            android:id="@+id/box_adjusted_range"
+            android:orientation="vertical"
+            android:layout_width="0dip" 
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingRight="@dimen/margin"
+            android:layout_weight="1">
+            <TextView android:id="@+id/adjusted_heart_range_value"
+                android:textSize="@dimen/value"
+                android:layout_width="fill_parent" 
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" 
+                android:background="@color/display_background" 
+                android:paddingLeft="@dimen/padding" 
+                android:paddingRight="@dimen/padding" 
+                android:paddingTop="@dimen/padding"
+                android:text=""
+                android:textColor="@color/red" />
+          
+            <TextView android:id="@+id/adjusted_heart_range_label"
+                android:gravity="center_horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/units" 
+                android:text="@string/adjusted_heart_range" 
+                android:textColor="@color/red" 
+                android:background="@color/display_background" 
+                android:paddingBottom="@dimen/padding"/>            
+        </LinearLayout>
+       </LinearLayout>   
+   
        <LinearLayout
             android:id="@+id/row_4"
 	        android:orientation="horizontal" 

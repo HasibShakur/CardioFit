@@ -84,6 +84,7 @@ public class Workout extends Activity implements OnInitListener {
     private TextView mWorkoutType;
     private TextView mHeartRate;
     private TextView mHeartRange;
+    private TextView mAdjustedHeartRange;
     
 	private DBOperateDAO operatorDao;
 
@@ -112,11 +113,16 @@ public class Workout extends Activity implements OnInitListener {
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothChatService mChatService = null;
     
-    
+    /**Variables Used For manipulating heart range**/
     private ArrayList<Integer> heartRates = new ArrayList<Integer>();
     private ArrayList<Integer> tempHeartRates = new ArrayList<Integer>();
+    public static ArrayList<Integer> avgTempHeartRates = new ArrayList<Integer>();
     public static int heart_range_low;
     public static int heart_range_high;
+    public static int current_range_low;
+    public static int current_range_high;
+    public static int consecutive_lows;
+    public static int consecutive_highs;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -146,6 +152,7 @@ public class Workout extends Activity implements OnInitListener {
                 
         Intent intent = getIntent();
         String workout_type = intent.getStringExtra(StartWorkout.WORKOUT_TYPE);
+        String heartRange_type = intent.getStringExtra(StartWorkout.HEART_RANGE_TYPE);
         
         mWorkoutType = (TextView) findViewById(R.id.workout_type);
         mWorkoutType.setText(workout_type);
@@ -166,11 +173,19 @@ public class Workout extends Activity implements OnInitListener {
 			startActivity(edit_profile_intent);
 		} else {
 	        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
-	        heart_range_low = profiles.get(0).getAerobicLowHeartRate();
-	        //heart_range_low = 65;
-	        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
-	        //heart_range_high = 85;
+	        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
+	        if (heartRange_type.equals("Aerobic")){
+	        	heart_range_low = profiles.get(0).getAerobicLowHeartRate();
+		        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
+	        } else {
+	        	heart_range_low = profiles.get(0).getWeightManageLowHeartRate();
+		        heart_range_high = profiles.get(0).getWeightManageHighHeartRate();
+	        }
+	        current_range_low = heart_range_low;
+	        current_range_high = heart_range_high;
+	        
 	        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
+	        mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_low);
 		}
         
 
@@ -299,49 +314,104 @@ public class Workout extends Activity implements OnInitListener {
                 break;
             case MESSAGE_READ:
             	byte[] readBuf = null;
-            	readBuf = (byte[]) msg.obj;         
-            	
-            	//String Value = byteToHex(readBuf[1]);
-            	//String Value2 = byte2hex(readBuf);
-                //String Value = parseBioharnessPacket(readBuf);
+            	readBuf = (byte[]) msg.obj;  
                 String Value = Util.byteToHex(readBuf[13]);
-            	Log.i(TAG, Value);
                 int heart_rate = Integer.parseInt(Value, 16);
                 
+                //Ignore non-sensible data
+                if (heart_rate < 50 || heart_rate > 220) {
+                	break;
+                }
                 
-                
-                // Need to change to fit user's range for whichever workout they chose
-                // TEMPORARY
+                //Add the heart rate to an array to be used for calculating average heart rate
                 heartRates.add(heart_rate);
-
                 tempHeartRates.add(heart_rate);
+                
+                //Calculate average of last 15 heart rates
                 int avg = 0;
                 if (tempHeartRates.size() == 15) {
-                	int total = 0;
-	                for (int hr : tempHeartRates) {
-	                	total = total + hr;
-	                }
-	                avg = total/15;
-	                Log.i(TAG, "AVERAGE = " + avg);
+                	avg = getAverage(tempHeartRates);
+                    avgTempHeartRates.add(avg);
             		tempHeartRates.clear();
-
                 }
                 
-                if (avg <= heart_range_low && avg != 0 && voice_on == true) {
+                if (avg >= current_range_low && avg <= current_range_high) {
+                	if (current_range_low == heart_range_low && current_range_high == heart_range_high) {
+                		consecutive_lows = 0;
+                		consecutive_highs = 0;
+                	} else if(avg < heart_range_low) {
+                		consecutive_lows += 1;
+                	} else {
+                		consecutive_highs += 1;
+                	}
+                	if (consecutive_lows == 15) {
+                		int difference = heart_range_low - current_range_low;
+                		if (difference > 5) {
+                			current_range_low += 5;
+                			current_range_high += 5;
+                		} else {
+                			current_range_low = heart_range_low;
+                			current_range_high = heart_range_high;
+                		}
+                	} else if (consecutive_highs == 15) {
+                		int difference = current_range_high - heart_range_high;
+                		if (difference > 5) {
+                			current_range_high -= 5;
+                			current_range_low -= 5;
+                		} else {
+                			current_range_high = heart_range_high;
+                			current_range_low = heart_range_low;
+                		}
+                	}
+                	
+                	if (consecutive_lows == 15 || consecutive_highs == 15) {
+                		//adjust heart_ranges
+                		int avg_of_avg = getAverage(avgTempHeartRates);
+                		Log.i(TAG, "Avg of avg = " + avg_of_avg);
+                		avgTempHeartRates.clear();
+                		current_range_low = avg_of_avg - 10;
+                		current_range_high = avg_of_avg + 10;
+                		consecutive_lows = consecutive_highs = 0;
+                		if (voice_on) tts.speak("Suggested Heart Range Adjusted", TextToSpeech.QUEUE_ADD, null);
+                	} 
+                } else {
+                	if (avg < current_range_low && avg != 0) {
+                		consecutive_lows += 1;
+                	} else {
+                		consecutive_highs += 1;
+                	}
+                	
+                	if (consecutive_lows == 15 || consecutive_highs == 15) {
+                		//adjust heart_ranges
+                		int avg_of_avg = getAverage(avgTempHeartRates);
+                		Log.i(TAG, "Avg of avg = " + avg_of_avg);
+                		avgTempHeartRates.clear();
+                		current_range_low = avg_of_avg - 10;
+                		current_range_high = avg_of_avg + 10;
+                		consecutive_lows = consecutive_highs = 0;
+                		if (voice_on) tts.speak("Suggested Heart Range Adjusted", TextToSpeech.QUEUE_ADD, null);
+                	}
+                }
+                                
+                if (avg <= current_range_low && avg != 0 && voice_on == true) {
             		tts.speak("Heart Rate Too Low", TextToSpeech.QUEUE_ADD, null);
                 }
-                if (avg >= heart_range_high && voice_on == true) {
+                if (avg >= current_range_high && voice_on == true) {
             		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
                 }
                 
-                if (heart_rate <= heart_range_low) {
+                if (heart_rate <= current_range_low) {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
-                } else if (heart_rate >= heart_range_high) {
+                } else if (heart_rate >= current_range_high) {
                 	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
                 } else {
                 	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
                 }
                 mHeartRate.setText(String.valueOf(heart_rate));
+                
+    	        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
+    	        mAdjustedHeartRange.setText(current_range_low + " - " + current_range_high);
+
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
@@ -375,6 +445,14 @@ public class Workout extends Activity implements OnInitListener {
 
     
 
+    public int getAverage(ArrayList<Integer> heartRates) {
+    	int total = 0;
+        for (int hr : heartRates) {
+        	total = total + hr;
+        }
+        int avg = total/heartRates.size();
+    	return avg;
+    }
 
     
     
@@ -467,9 +545,11 @@ public class Workout extends Activity implements OnInitListener {
         	.setIcon(android.R.drawable.ic_lock_power_off)
         	.setShortcut('9', 'q');
         }
-        menu.add(0, secure_connect_scan, 0, R.string.secure_connect)
-        .setIcon(android.R.drawable.ic_menu_search)
-        .setShortcut('9', 'q');
+        if (!service_is_running) {
+            menu.add(0, secure_connect_scan, 0, R.string.secure_connect)
+            .setIcon(android.R.drawable.ic_menu_search)
+            .setShortcut('9', 'q');
+        }
         return true;
     }
     
