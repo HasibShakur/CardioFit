@@ -592,7 +592,7 @@ public class Workout extends Activity implements OnInitListener {
 		
 		// for just now these are set to 0.0
 		workout.setBurnedCalories(0.0);
-		workout.setDistance(0.0);
+		workout.setTimeWithinRange(0.0);
 		operatorDao.CreateWorkout(workout);
 		Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
 		
