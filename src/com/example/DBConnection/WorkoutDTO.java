@@ -20,7 +20,7 @@ public class WorkoutDTO {
 	private int highHeartRate;
 	private int lowHeartRate;
 	private double burnedCalories;
-	private double distance;
+	private double timeWithinRange;
 	private String workoutType;
 	
 	public long getId() {
@@ -71,17 +71,17 @@ public class WorkoutDTO {
 	public void setBurnedCalories(double burnedCalories) {
 		this.burnedCalories = burnedCalories;
 	}
-	public double getDistance() {
-		return distance;
-	}
-	public void setDistance(double distance) {
-		this.distance = distance;
-	}
 	public String getWorkoutType() {
 		return workoutType;
 	}
 	public void setWorkoutType(String workoutType) {
 		this.workoutType = workoutType;
+	}
+	public double getTimeWithinRange() {
+		return timeWithinRange;
+	}
+	public void setTimeWithinRange(double timeWithinRange) {
+		this.timeWithinRange = timeWithinRange;
 	}
 	
 

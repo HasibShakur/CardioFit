@@ -40,7 +40,7 @@ public final class DBTableContract {
 		public static final String COLUMN_NAME_END_TIME = "endTime";
 		public static final String COLUMN_NAME_HEART_RATE_HIGH = "heartRateHigh";
 		public static final String COLUMN_NAME_HEART_RATE_LOW = "heartRateLow";
-		public static final String COLUMN_NAME_DISTANCE = "distance";
+		public static final String COLUMN_NAME_TIME_WITHIN_RANGE = "timeWithinRange";
 		public static final String COLUMN_NAME_BURNED_CALORIES = "calories";
 		public static final String COLUMN_NAME_WORKOUT_TYPE = "workoutType";
 	}

@@ -32,7 +32,7 @@ public class DBOperateDAO {
 			DBTableContract.Workout.COLUMN_NAME_START_TIME, DBTableContract.Workout.COLUMN_NAME_END_TIME,
 			DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW,
 			DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES,
-			DBTableContract.Workout.COLUMN_NAME_DISTANCE, DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE
+			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE
 	};
 	
 	public DBOperateDAO(Context context)
@@ -107,7 +107,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, workout.getHighHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW, workout.getLowHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES, workout.getBurnedCalories());
-		values.put(DBTableContract.Workout.COLUMN_NAME_DISTANCE, workout.getDistance());
+		values.put(DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, workout.getTimeWithinRange());
 		values.put(DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, workout.getWorkoutType());
 		database.insert(DBTableContract.Workout.TABLE_NAME, null, values);
 	}
@@ -167,7 +167,7 @@ public class DBOperateDAO {
 		w.setHighHeartRate(c.getInt(5));
 		w.setLowHeartRate(c.getInt(6));
 		w.setBurnedCalories(c.getDouble(7));
-		w.setDistance(c.getDouble(8));
+		w.setTimeWithinRange(c.getDouble(8));
 		w.setWorkoutType(c.getString(9));
 		return w;
 		
