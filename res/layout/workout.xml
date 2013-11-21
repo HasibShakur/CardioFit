@@ -207,7 +207,7 @@
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
 		    android:text="@string/discard_workout"
-		    android:onClick="DiscardWorkout" />
+		    android:onClick="discardWorkout" />
 			
 		</LinearLayout>
 		

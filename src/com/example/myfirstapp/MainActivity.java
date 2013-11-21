@@ -78,7 +78,6 @@ public class MainActivity extends Activity {
      */
 	public void startWorkout(View view) {
 		Intent intent = new Intent(this, StartWorkout.class);
-		//intent.putExtra(EXTRA_MESSAGE, "START WORKOUT");
 		startActivity(intent);
 	}
 	
@@ -90,7 +89,17 @@ public class MainActivity extends Activity {
 	 */
 	public void editProfile(View view) {
 		Intent intent = new Intent(this, EditProfile.class);
-		//intent.putExtra(EXTRA_MESSAGE, "EDIT PROFILE");
+		startActivity(intent);
+	}
+	
+	/**
+	 * Called when a user clicks 'View History'
+	 * Opens the workout history activity
+	 * @param view
+	 * @author: Wyatt Kaiser
+	 */
+	public void viewHistory(View view) {
+		Intent intent = new Intent(this, WorkoutHistory.class);
 		startActivity(intent);
 	}
 }

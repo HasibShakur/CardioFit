@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    
+    <string name="hello_world">Hello World</string>
     
     <!-- Main Activity -->
     <string name="app_name">Cardio Fit</string>
@@ -42,6 +42,10 @@
     <string name="turn_on_voice">Turn On Voice Warnings</string>
     <string name="voice_turned_on">Voice Warnings Turned On</string>
     <string name="Play_Music">Play Music</string>
+    
+    <!-- WorkoutHistory Activity -->
+    <string name="view_history">History</string>
+    <string name="title_workout_history">Workout History</string>
     
     
     

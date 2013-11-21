@@ -30,6 +30,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.example.myfirstapp.WorkoutHistory"
+            android:label="@string/title_workout_history"
+            android:parentActivityName="com.example.myfirstapp.MainActivity">
+        	<meta-data 
+        	    android:name="android.support.PARENT_ACTIVITY"
+        	    android:value="com.example.myfirstapp.MainActivity" />
+        </activity>
+        	
+        <activity
             android:name="com.example.myfirstapp.EditProfile"
             android:label="@string/title_edit_profile"
             android:parentActivityName="com.example.myfirstapp.MainActivity" >

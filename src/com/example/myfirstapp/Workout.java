@@ -31,12 +31,14 @@ import com.example.DBConnection.WorkoutDTO;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -353,6 +355,7 @@ public class Workout extends Activity implements OnInitListener {
                 			current_range_low = heart_range_low;
                 			current_range_high = heart_range_high;
                 		}
+                		consecutive_highs = consecutive_lows = 0;
                 	} else if (consecutive_highs == 15) {
                 		int difference = current_range_high - heart_range_high;
                 		if (difference > 5) {
@@ -362,17 +365,7 @@ public class Workout extends Activity implements OnInitListener {
                 			current_range_high = heart_range_high;
                 			current_range_low = heart_range_low;
                 		}
-                	}
-                	
-                	if (consecutive_lows == 15 || consecutive_highs == 15) {
-                		//adjust heart_ranges
-                		int avg_of_avg = getAverage(avgTempHeartRates);
-                		Log.i(TAG, "Avg of avg = " + avg_of_avg);
-                		avgTempHeartRates.clear();
-                		current_range_low = avg_of_avg - 10;
-                		current_range_high = avg_of_avg + 10;
-                		consecutive_lows = consecutive_highs = 0;
-                		if (voice_on) tts.speak("Suggested Heart Range Adjusted", TextToSpeech.QUEUE_ADD, null);
+                		consecutive_highs = consecutive_lows = 0;
                 	} 
                 } else {
                 	if (avg < current_range_low && avg != 0) {
@@ -574,35 +567,59 @@ public class Workout extends Activity implements OnInitListener {
 	}	
 	
     public void saveWorkout (View view) {
-    	
-    	//If the heart monitor was never attached --> can't save any information
-    	if (heartRates.size() == 0) {
-    		Toast.makeText(getApplicationContext(), "No workout data to save", Toast.LENGTH_LONG).show(); 
-    	}
-		endTime = System.currentTimeMillis();
-		
-		profiles = operatorDao.getAllProfiles();
-		workout.setProfileId(profiles.get(0).getPersonId());
-		workout.setWorkoutDate(Calendar.getInstance().getTime());
-		workout.setWorkoutStart(new Time(startTime));
-		workout.setWorkoutEnd(new Time(endTime));
-		workout.setWorkoutType(mWorkoutType.getText().toString().trim());
-		workout.setHighHeartRate(heart_range_high);
-		workout.setLowHeartRate(heart_range_low);
-		
-		// for just now these are set to 0.0
-		workout.setBurnedCalories(0.0);
-		workout.setDistance(0.0);
-		operatorDao.CreateWorkout(workout);
-		Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
-		
+    	new AlertDialog.Builder(this)
+    		.setIcon(android.R.drawable.ic_dialog_alert)
+    		.setTitle("Save Workout")
+    		.setMessage("Are you sure you want to save and end this workout?")
+    		.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+     {
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+        	//If the heart monitor was never attached --> can't save any information
+         	if (heartRates.size() == 0) {
+         		Toast.makeText(getApplicationContext(), "No workout data to save", Toast.LENGTH_LONG).show();
+         		return;
+         	}
+         	endTime = System.currentTimeMillis();
+            
+            profiles = operatorDao.getAllProfiles();
+            workout.setProfileId(profiles.get(0).getPersonId());
+            workout.setWorkoutDate(Calendar.getInstance().getTime());
+            workout.setWorkoutStart(new Time(startTime));
+            workout.setWorkoutEnd(new Time(endTime));
+            workout.setWorkoutType(mWorkoutType.getText().toString().trim());
+            workout.setHighHeartRate(heart_range_high);
+            workout.setLowHeartRate(heart_range_low);
+            
+            // for just now these are set to 0.0
+            workout.setBurnedCalories(0.0);
+            //workout.setTimeWithinRange(0.0);
+            operatorDao.CreateWorkout(workout);
+            Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
+     		finish();
+     		
+         }
+
+     })
+     .setNegativeButton("No", null)
+     .show();
 	}
 	
 	public void discardWorkout (View view) {
-		//TODO: method to discard data and return to previous screen
-		//operatorDao.deleteWorkout(workout);
-		//Toast.makeText(getApplicationContext(), "Workout Data Deleted Successfully", Toast.LENGTH_LONG).show(); 	
-		
+		new AlertDialog.Builder(this)
+        	.setIcon(android.R.drawable.ic_dialog_alert)
+        	.setTitle("Closing Activity")
+        	.setMessage("Are you sure you want to discard and end this workout?")
+        	.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+        	{
+        		@Override
+        		public void onClick(DialogInterface dialog, int which) {
+        			finish();    
+        		}
+
+        	})
+        	.setNegativeButton("No", null)
+        	.show();		
 	}
 	
   	/**
@@ -620,6 +637,24 @@ public class Workout extends Activity implements OnInitListener {
         notification.setLatestEventInfo(this, text, getText(R.string.notification_subtitle), contentIntent);
 
         mNM.notify(R.string.app_name, notification);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Closing Activity")
+            .setMessage("Are you sure you want to close this activity?")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();    
+            }
+
+        })
+        .setNegativeButton("No", null)
+        .show();
     }
 
 }
