@@ -3,6 +3,15 @@
  */
 package com.example.myfirstapp;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import android.text.format.Time;
+import android.util.Log;
+
 /**
  * @author Hasib Shakur
  *
@@ -51,5 +60,21 @@ public class Util {
   		else
   			return (char) ('a' + (i - 10));
   	}
+  	
+  	public static String dateConversion (String dateStr) throws ParseException {
+  		DateFormat formatter = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
+  		Date date = (Date)formatter.parse(dateStr);
 
+  		Calendar cal = Calendar.getInstance();
+  		cal.setTime(date);
+  		String formattedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" +         cal.get(Calendar.YEAR);
+  		return formattedDate;
+  	}
+  	
+  	/*public static Time timeConversion (String timeStr) {
+		DateFormat formatter = new SimpleDateFormat("hh:mm:ss a");
+		Date date = (Date)formatter.parse(timeStr);
+		java.sql.Time.valueOf(date);
+		return date
+  	}*/
 }

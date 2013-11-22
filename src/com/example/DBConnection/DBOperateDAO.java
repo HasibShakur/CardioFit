@@ -4,14 +4,19 @@
 package com.example.DBConnection;
 
 import java.sql.Time;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+
+import com.example.myfirstapp.Util;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * @author Hasib Shakur
@@ -153,17 +158,23 @@ public class DBOperateDAO {
 		w.setId(c.getLong(0));
 		w.setProfileId(c.getLong(1));
 		String date = c.getString(2);
+		String formatted_date = "00/00/0000";
+		try {
+			formatted_date = Util.dateConversion(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		String[] splitter;
-		splitter = date.split("/");
+		splitter = formatted_date.split("/");
+		
 		Date d = new Date();
 		d.setDate(Integer.parseInt(splitter[0]));
 		d.setMonth(Integer.parseInt(splitter[1]));
 		d.setYear(Integer.parseInt(splitter[2]));
 		w.setWorkoutDate(d);
-		long start  = Long.parseLong(c.getString(3));
-		w.setWorkoutStart(new Time(start));
-		long end = Long.parseLong(c.getString(4));
-		w.setWorkoutEnd(new Time(end));
+		
+		w.setWorkoutStart(Time.valueOf(c.getString(3)));
+		w.setWorkoutEnd(Time.valueOf(c.getString(4)));
 		w.setHighHeartRate(c.getInt(5));
 		w.setLowHeartRate(c.getInt(6));
 		w.setBurnedCalories(c.getDouble(7));

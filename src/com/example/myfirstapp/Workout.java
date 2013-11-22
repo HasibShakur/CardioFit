@@ -123,8 +123,15 @@ public class Workout extends Activity implements OnInitListener {
     public static int heart_range_high;
     public static int current_range_low;
     public static int current_range_high;
-    public static int consecutive_lows;
-    public static int consecutive_highs;
+    public static int consecutive_desired_lows;
+    public static int consecutive_desired_highs;
+    public static int consecutive_outrange_lows;
+    public static int consecutive_outrange_highs;
+    public static int consecutive_inrange_lows;
+    public static int consecutive_inrange_highs;
+    public static int consecutive_low_threshold;
+    public static int consecutive_high_threshold;
+    public static boolean isWarmup;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -154,7 +161,7 @@ public class Workout extends Activity implements OnInitListener {
                 
         Intent intent = getIntent();
         String workout_type = intent.getStringExtra(StartWorkout.WORKOUT_TYPE);
-        String heartRange_type = intent.getStringExtra(StartWorkout.HEART_RANGE_TYPE);
+        final String heartRange_type = intent.getStringExtra(StartWorkout.HEART_RANGE_TYPE);
         
         mWorkoutType = (TextView) findViewById(R.id.workout_type);
         mWorkoutType.setText(workout_type);
@@ -165,18 +172,17 @@ public class Workout extends Activity implements OnInitListener {
 		operatorDao.openDatabase();
 		
 		//Get the items from view & set their initial values (if they exist)
-		ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
-		//Get the items from view & set their initial values (if they exist)
+		final ArrayList<ProfileDTO> profiles = operatorDao.getAllProfiles();
 
-		profiles = operatorDao.getAllProfiles();
 		
 		if ((profiles.size() < 1)) {
 			Intent edit_profile_intent = new Intent(this, EditProfile.class);
 			startActivity(edit_profile_intent);
+			return;
 		} else {
 	        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
 	        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
-	        if (heartRange_type.equals("Aerobic")){
+			if (heartRange_type.equals("Aerobic")){
 	        	heart_range_low = profiles.get(0).getAerobicLowHeartRate();
 		        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
 	        } else {
@@ -197,6 +203,13 @@ public class Workout extends Activity implements OnInitListener {
     protected void onStart() {
         Log.i(TAG, "[ACTIVITY] onStart");
         super.onStart();
+        
+        profiles = operatorDao.getAllProfiles();
+		if ((profiles.size() < 1)) {
+			//Intent edit_profile_intent = new Intent(this, EditProfile.class);
+			//startActivity(edit_profile_intent);
+			return;
+		}
         
         // If BT is not on, request that it be enabled.
         if (!mBluetoothAdapter.isEnabled()) {
@@ -337,16 +350,43 @@ public class Workout extends Activity implements OnInitListener {
             		tempHeartRates.clear();
                 }
                 
+                //If the users heart rate is within our current range
                 if (avg >= current_range_low && avg <= current_range_high) {
+                	consecutive_outrange_lows = 0;
+            		consecutive_outrange_highs = 0;
+            		//If the current range is equivalent to the desired heart range
+            		//PERFECT! this is what we want
                 	if (current_range_low == heart_range_low && current_range_high == heart_range_high) {
-                		consecutive_lows = 0;
-                		consecutive_highs = 0;
-                	} else if(avg < heart_range_low) {
-                		consecutive_lows += 1;
-                	} else {
-                		consecutive_highs += 1;
+                		consecutive_inrange_lows = 0;
+                		consecutive_inrange_highs = 0;
+                	} 
+                	//If the heart rate is within the current range, but still lower than the desired range
+                	//increase the consecutive desired lows and consecutive in range lows
+                	else if(avg < heart_range_low) {
+                		consecutive_desired_lows += 1;
+                		consecutive_desired_highs = 0;
+                		consecutive_inrange_lows += 1;
+                		consecutive_inrange_highs = consecutive_desired_highs = consecutive_outrange_highs = consecutive_outrange_lows = 0;
                 	}
-                	if (consecutive_lows == 15) {
+                	//If the heart rate is within the current range, but still higher than the desired range
+                	//increase the consecutive desired highs and consecutive in range highs
+                	else if (avg > heart_range_high) {
+                		consecutive_desired_highs += 1;
+                		consecutive_inrange_highs += 1;
+                		consecutive_inrange_lows = consecutive_desired_lows = consecutive_outrange_lows = consecutive_outrange_highs = 0;
+                	}
+                	//In this case the average was within the original desired range, so set custom range to be that
+            		//GREAT! we've worked back to the desired range!
+                	else {
+                		current_range_low = heart_range_low;
+                		current_range_high = heart_range_high;
+                		consecutive_desired_lows = consecutive_desired_highs = 0;
+                		consecutive_inrange_lows = consecutive_inrange_highs = 0;
+                		consecutive_outrange_lows = consecutive_outrange_highs = 0;
+                	}
+                	//If the user is continually meeting the customized range, but the range is lower than the optimal range
+                	//In this case we will slowly increment the current range until it matches the desired range
+                	if (consecutive_inrange_lows == 2) {
                 		int difference = heart_range_low - current_range_low;
                 		if (difference > 5) {
                 			current_range_low += 5;
@@ -355,8 +395,10 @@ public class Workout extends Activity implements OnInitListener {
                 			current_range_low = heart_range_low;
                 			current_range_high = heart_range_high;
                 		}
-                		consecutive_highs = consecutive_lows = 0;
-                	} else if (consecutive_highs == 15) {
+                		consecutive_inrange_highs = consecutive_inrange_lows = 0;
+                	//If the user is continually meeting the customized range, but the range is higher than the optimal range
+                	//In this case we will slowly decrement the current range until it matches the desired range
+                	} else if (consecutive_inrange_highs == 2) {
                 		int difference = current_range_high - heart_range_high;
                 		if (difference > 5) {
                 			current_range_high -= 5;
@@ -365,25 +407,87 @@ public class Workout extends Activity implements OnInitListener {
                 			current_range_high = heart_range_high;
                 			current_range_low = heart_range_low;
                 		}
-                		consecutive_highs = consecutive_lows = 0;
+                		consecutive_inrange_highs = consecutive_inrange_lows = 0;
                 	} 
-                } else {
+                } 
+                //If the user has heart range greater than the current range, but the current range is lower than desired range
+                //In this case, we will simply move the current_range higher because we want to get closer to the desired range
+                else if (avg > current_range_high && current_range_high < heart_range_high) {
+                	current_range_high = avg + 10;
+                	current_range_low = avg - 10;
+                	consecutive_desired_lows += 1;
+                	consecutive_inrange_lows = consecutive_inrange_highs = 0;
+                	consecutive_outrange_lows = consecutive_outrange_highs = 0;
+                } 
+                //If the user has heart range lower than the current range, but the current range is higher than the desired range
+                //In this case, we will simply move the current range lower, because we want to get closer to the desired range
+                else if (avg < current_range_low && current_range_low > heart_range_low) {
+                	current_range_high = avg + 10;
+                	current_range_low = avg + 10;
+                	consecutive_desired_highs += 1;
+                	consecutive_inrange_lows = consecutive_inrange_highs = 0;
+                	consecutive_outrange_lows = consecutive_outrange_highs = 0;
+                }
+                //The user has a heart range lower than the current range, and the current range is lower than the desired range OR
+                //The user has a heart range higher than the current range, and the current range is higher than the desired range
+                else {
+                	consecutive_low_threshold = consecutive_high_threshold = 8;
+                	//If the users heart rate is lower than the current range, and lower than the desired range
+                	//We will slowly decrement the current range dependent on how far away they are from the range
                 	if (avg < current_range_low && avg != 0) {
-                		consecutive_lows += 1;
-                	} else {
-                		consecutive_highs += 1;
+                		consecutive_desired_lows += 1;
+                		consecutive_outrange_lows += 1;
+                		consecutive_desired_highs = consecutive_outrange_highs = consecutive_inrange_highs = consecutive_inrange_lows = 0;
+                		if (current_range_low - avg > current_range_low * .3) {
+                			consecutive_low_threshold = 1;
+                		} else if (current_range_low - avg > current_range_low * .2) {
+                			consecutive_low_threshold = 2;
+                		} else if (current_range_low - avg > current_range_low * .15) {
+                			consecutive_low_threshold = 4;
+                		} else if (current_range_low - avg > current_range_low * .1) {
+                			consecutive_low_threshold = 6;
+                		}
+                	} 
+                	//If the users heart rate is higher than the current range, and higher than the desired range
+                	//We will slowly increment the current range depended on how far they are away from the range
+                	else if (avg > current_range_high && avg!= 0){
+                		consecutive_desired_highs += 1;
+                		consecutive_outrange_highs += 1;
+                		consecutive_desired_lows = consecutive_outrange_lows = consecutive_inrange_lows = consecutive_inrange_highs = 0;
+                		if (avg - current_range_high > current_range_high * .3) {
+                			consecutive_high_threshold = 1;
+                		} else if (avg - current_range_high> current_range_high * .2) {
+                			consecutive_high_threshold = 2;
+                		} else if (avg - current_range_high > current_range_high * .15) {
+                			consecutive_high_threshold = 4;
+                		} else if (current_range_high - avg > current_range_high * .1) {
+                			consecutive_high_threshold = 6;
+                		}
                 	}
-                	
-                	if (consecutive_lows == 15 || consecutive_highs == 15) {
-                		//adjust heart_ranges
-                		int avg_of_avg = getAverage(avgTempHeartRates);
-                		Log.i(TAG, "Avg of avg = " + avg_of_avg);
-                		avgTempHeartRates.clear();
-                		current_range_low = avg_of_avg - 10;
-                		current_range_high = avg_of_avg + 10;
-                		consecutive_lows = consecutive_highs = 0;
-                		if (voice_on) tts.speak("Suggested Heart Range Adjusted", TextToSpeech.QUEUE_ADD, null);
+                	//If the user is failing to meet our customized heart rate --> need to lower it more
+                	if (consecutive_outrange_lows >= consecutive_low_threshold) {
+            			current_range_low -= 5;
+            			current_range_high -= 5;
+                		consecutive_outrange_highs = consecutive_outrange_lows = 0;
                 	}
+                	//If the user is failing to bring heart rate down to customized heart rate --> need to raise range
+                	if (consecutive_outrange_highs >= consecutive_high_threshold) {
+            			current_range_low += 5;
+            			current_range_high += 5;
+            			consecutive_outrange_highs = consecutive_outrange_lows = 0;
+                	}
+                }
+                
+                
+                //If the user is continually below the desired heart range (even if they are within the current range)
+                if (consecutive_desired_lows >= 8) {
+                	if (voice_on) tts.speak("You need to raise your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
+                	consecutive_desired_lows = 0;
+                }
+                //if the user is continually above the desired heart range (even if they are within the current range)
+                if (consecutive_desired_highs >= 8 ){
+                	if (voice_on) tts.speak("You need to lower your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
+                	consecutive_desired_highs = 0;
                 }
                                 
                 if (avg <= current_range_low && avg != 0 && voice_on == true) {
@@ -393,9 +497,9 @@ public class Workout extends Activity implements OnInitListener {
             		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
                 }
                 
-                if (heart_rate <= current_range_low) {
+                if (heart_rate < current_range_low) {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
-                } else if (heart_rate >= current_range_high) {
+                } else if (heart_rate > current_range_high) {
                 	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
                 } else {
                 	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
