@@ -2,6 +2,7 @@ package com.example.myfirstapp;
 
 
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 import com.example.DBConnection.DBOperateDAO;
@@ -55,10 +56,14 @@ public class WorkoutHistory extends Activity {
 		  int j = 0;
 		  for (WorkoutDTO workout : workouts) {
 			  Group group = new Group(workout.getWorkoutType() + ", " + workout.getWorkoutDate().toString().substring(0,10));
-			  //Group group = new Group("hello");
-			  group.children.add("Duration: " + workout.getWorkoutStart() + " - " + workout.getWorkoutEnd());
+			  long ms = workout.getWorkoutEnd().getTime() - workout.getWorkoutStart().getTime();
+			  long durationInMinutes = ms / (60 * 1000);
+
+			  group.children.add("Duration: " + durationInMinutes + " mins");
 			  group.children.add("Max Heart Rate: " + workout.getHighHeartRate());
+			  group.children.add("Min Heart Rate: " + workout.getLowHeartRate());
 			  //group.children.add("Avg Heart Rate: " + workout.getAverageHeartRate());
+			  //gropu.children.add("Time within desired range: " + workout.getTimeWithinRange());
 			  group.children.add("Burned Calores: " + workout.getBurnedCalories());
 		      groups.append(j, group);
 			  j++;

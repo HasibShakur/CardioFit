@@ -22,26 +22,43 @@ public class Util {
 	{
 		return (weightInInch/(Math.pow(heightInInch, 2)))*703;
 	}
-	public int getMaxHeartRate(int age)
+	public static int getMaxHeartRate(int age)
 	{
 		return (220 - age);
 	}
-	public int getAerobicLowHeartRate(int age)
-	{
-		return (int) (getMaxHeartRate(age) * .7);
-	}
-	public int getAerobicHighHeartRate(int age)
+	public static int getHeavyAerobicLowHeartRate(int age)
 	{
 		return (int) (getMaxHeartRate(age) * .8);
 	}
-	public int getWeightManageLowHeartRate(int age)
+	public static int getHeavyAerobicHighHeartRate(int age)
 	{
-		return (int) (getMaxHeartRate(age) * .6);
+		return (int) (getMaxHeartRate(age) * .9);
 	}
-	public int getWeightManageHighHeartRate(int age)
+	public static int getLightAerobicLowHeartRate(int age)
 	{
 		return (int) (getMaxHeartRate(age) * .7);
 	}
+	public static int getLightAerobicHighHeartRate(int age)
+	{
+		return (int) (getMaxHeartRate(age) * .8);
+	}
+	public static int getHeavyWeightManageLowHeartRate(int age)
+	{
+		return (int) (getMaxHeartRate(age) * .6);
+	}
+	public static int getHeavyWeightManageHighHeartRate(int age)
+	{
+		return (int) (getMaxHeartRate(age) * .7);
+	}
+	public static int getLightWeightManageLowHeartRate(int age)
+	{
+		return (int) (getMaxHeartRate(age) * .5);
+	}
+	public static int getLightWeightManageHighHeartRate(int age)
+	{
+		return (int) (getMaxHeartRate(age) * .6);
+	}
+	
 	
 	/**
 	 * Used for conversion of the raw data bluetooth packet
