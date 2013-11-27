@@ -24,15 +24,14 @@ public class DBOperateDAO {
 	private DBHelper helper;
 	private String[] profileColumns = { DBTableContract.Profile.COLUMN_NAME_PERSON_ID, DBTableContract.Profile.COLUMN_NAME_NAME,
 			DBTableContract.Profile.COLUMN_NAME_AGE, DBTableContract.Profile.COLUMN_NAME_HEIGHT,
-			DBTableContract.Profile.COLUMN_NAME_WEIGHT, DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH,
-			DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH,
-			DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW		
+			DBTableContract.Profile.COLUMN_NAME_WEIGHT, DBTableContract.Profile.COLUMN_NAME_GENDER	
 	};
 	private String[] workoutColumns = { DBTableContract.Workout.COLUMN_NAME_ID , DBTableContract.Workout.COLUMN_NAME_PROFILE_ID, DBTableContract.Workout.COLUMN_NAME_DATE,
 			DBTableContract.Workout.COLUMN_NAME_START_TIME, DBTableContract.Workout.COLUMN_NAME_END_TIME,
 			DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW,
 			DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES,
-			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE
+			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, 
+			DBTableContract.Workout.COLUMN_NAME_AVG_HEART_RATE
 	};
 	
 	public DBOperateDAO(Context context)
@@ -55,10 +54,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Profile.COLUMN_NAME_AGE, profile.getPersonAge());
 		values.put(DBTableContract.Profile.COLUMN_NAME_HEIGHT, profile.getHeight());
 		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT, profile.getWeight());
-		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH, profile.getWeightManageHighHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, profile.getWeightManageLowHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_GENDER, profile.getGender());
 		database.insert(DBTableContract.Profile.TABLE_NAME, null, values);
 	}	
 	public void updateProfile(ProfileDTO profile)
@@ -69,10 +65,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Profile.COLUMN_NAME_AGE, profile.getPersonAge());
 		values.put(DBTableContract.Profile.COLUMN_NAME_HEIGHT, profile.getHeight());
 		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT, profile.getWeight());
-		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH, profile.getWeightManageHighHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW, profile.getWeightManageLowHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_HIGH, profile.getAerobicHighHeartRate());
-		values.put(DBTableContract.Profile.COLUMN_NAME_AEROBIC_HEART_RATE_LOW, profile.getAerobicLowHeartRate());
+		values.put(DBTableContract.Profile.COLUMN_NAME_GENDER, profile.getGender());
 		database.update(DBTableContract.Profile.TABLE_NAME, values, null, null);
 	}
 	
@@ -109,6 +102,7 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES, workout.getBurnedCalories());
 		values.put(DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, workout.getTimeWithinRange());
 		values.put(DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, workout.getWorkoutType());
+		values.put(DBTableContract.Workout.COLUMN_NAME_AVG_HEART_RATE, workout.getAverageHeartRate());
 		database.insert(DBTableContract.Workout.TABLE_NAME, null, values);
 	}
 	public void deleteWorkout(WorkoutDTO workout)
@@ -140,10 +134,7 @@ public class DBOperateDAO {
 		p.setPersonAge(c.getInt(2));
 		p.setHeight(c.getDouble(3));
 		p.setWeight(c.getDouble(4));
-		p.setWeightManageHighHeartRate(c.getInt(5));
-		p.setWeightManageLowHeartRate(c.getInt(6));
-		p.setAerobicHighHeartRate(c.getInt(7));
-		p.setAerobicLowHeartRate(c.getInt(8));
+		p.setGender(c.getString(5));
 		return p;
 	}
 	@SuppressWarnings("deprecation")
@@ -169,6 +160,7 @@ public class DBOperateDAO {
 		w.setBurnedCalories(c.getDouble(7));
 		w.setTimeWithinRange(c.getDouble(8));
 		w.setWorkoutType(c.getString(9));
+		w.setAverageHeartRate(c.getDouble(10));
 		return w;
 		
 	}

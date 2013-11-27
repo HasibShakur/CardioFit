@@ -27,6 +27,8 @@
     <string name="ft">ft</string>
     <string name="in">in</string>
     <string name="save">save</string> 
+    <string name ="Male">Male</string>
+    <string name="Female">Female</string>
     
     
     <!--  WorkoutActivity -->

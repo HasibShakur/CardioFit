@@ -174,13 +174,14 @@ public class Workout extends Activity implements OnInitListener {
 		} else {
 	        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
 	        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
-	        if (heartRange_type.equals("Aerobic")){
-	        	heart_range_low = profiles.get(0).getAerobicLowHeartRate();
-		        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
-	        } else {
-	        	heart_range_low = profiles.get(0).getWeightManageLowHeartRate();
-		        heart_range_high = profiles.get(0).getWeightManageHighHeartRate();
-	        }
+	     // Where previous aerobinc and other type of workout related heart rate data was stored
+//	        if (heartRange_type.equals("Aerobic")){
+//	        	heart_range_low = profiles.get(0).getAerobicLowHeartRate();
+//		        heart_range_high = profiles.get(0).getAerobicHighHeartRate();
+//	        } else {
+//	        	heart_range_low = profiles.get(0).getWeightManageLowHeartRate();
+//		        heart_range_high = profiles.get(0).getWeightManageHighHeartRate();
+//	        }
 	        current_range_low = heart_range_low;
 	        current_range_high = heart_range_high;
 	        

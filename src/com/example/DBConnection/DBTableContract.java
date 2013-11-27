@@ -25,10 +25,7 @@ public final class DBTableContract {
 		public static final String COLUMN_NAME_AGE = "age";
 		public static final String COLUMN_NAME_WEIGHT = "weight";
 		public static final String COLUMN_NAME_HEIGHT = "height";
-		public static final String COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_HIGH ="weightManagementHeartRateHigh";
-		public static final String COLUMN_NAME_WEIGHT_MANAGE_HEART_RATE_LOW ="weightManagementHeartRateLow";
-		public static final String COLUMN_NAME_AEROBIC_HEART_RATE_HIGH ="aerobicHeartRateHigh";
-		public static final String COLUMN_NAME_AEROBIC_HEART_RATE_LOW ="aerobicHeartRateLow";
+		public static final String COLUMN_NAME_GENDER = "gender";
 	}
 	public static abstract class Workout implements BaseColumns
 	{
@@ -43,5 +40,6 @@ public final class DBTableContract {
 		public static final String COLUMN_NAME_TIME_WITHIN_RANGE = "timeWithinRange";
 		public static final String COLUMN_NAME_BURNED_CALORIES = "calories";
 		public static final String COLUMN_NAME_WORKOUT_TYPE = "workoutType";
+		public static final String COLUMN_NAME_AVG_HEART_RATE = "averageHeartRate";
 	}
 }
