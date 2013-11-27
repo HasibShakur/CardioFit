@@ -40,6 +40,7 @@
     <string name="turn_off_voice">Turn Off Voice Warnings</string>
     <string name="voice_turned_off">Voice Warnings Turned Off</string>
     <string name="turn_on_voice">Turn On Voice Warnings</string>
+    <string name="skip_warmup">Skip Warm-up</string>
     <string name="voice_turned_on">Voice Warnings Turned On</string>
     <string name="Play_Music">Play Music</string>
     

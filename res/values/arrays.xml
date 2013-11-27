@@ -12,8 +12,10 @@
 </string-array>
 
 <string-array name="heartRanges_array">
-    	<item>Aerobic</item>
-    	<item>Weight-Management</item>
+    	<item>Light Aerobic</item>
+    	<item>Heavy Aerobic</item>
+    	<item>Light Weight-Management</item>
+    	<item>Heavy Weight-Management</item>
 </string-array>
     
 

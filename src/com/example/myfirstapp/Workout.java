@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -69,6 +70,7 @@ public class Workout extends Activity implements OnInitListener {
     private static final int VOICE_OFF = 9;
     private static final int VOICE_ON = 8;
     private static final int secure_connect_scan = 7;
+    private static final int SKIP_WARMUP = 6;
 
 	 // Debugging
     private static final String TAG = "Workout";
@@ -81,6 +83,7 @@ public class Workout extends Activity implements OnInitListener {
     long startTime = 0;
     long endTime = 0;
     boolean isChronometerRunning = false;
+    CountDownTimer countdown;
 
     //TextViews
     private TextView mWorkoutType;
@@ -131,7 +134,7 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_inrange_highs;
     public static int consecutive_low_threshold;
     public static int consecutive_high_threshold;
-    public static boolean isWarmup;
+    public static boolean isWarmup = true;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -199,7 +202,7 @@ public class Workout extends Activity implements OnInitListener {
 	        current_range_high = heart_range_high;
 	        
 	        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
-	        mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_low);
+	        mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_high);
 		}
         
 
@@ -341,6 +344,18 @@ public class Workout extends Activity implements OnInitListener {
                 
                 //Ignore non-sensible data
                 if (heart_rate < 50 || heart_rate > 220) {
+                	break;
+                }
+                if (heart_rate < current_range_low) {
+                	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
+                } else if (heart_rate > current_range_high) {
+                	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
+                } else {
+                	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
+                }
+                mHeartRate.setText(String.valueOf(heart_rate));
+                
+                if (isWarmup) {
                 	break;
                 }
                 
@@ -509,14 +524,7 @@ public class Workout extends Activity implements OnInitListener {
             		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
                 }
                 
-                if (heart_rate < current_range_low) {
-                	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
-                } else if (heart_rate > current_range_high) {
-                	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
-                } else {
-                	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
-                }
-                mHeartRate.setText(String.valueOf(heart_rate));
+                
                 
     	        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
     	        mAdjustedHeartRange.setText(current_range_low + " - " + current_range_high);
@@ -537,8 +545,9 @@ public class Workout extends Activity implements OnInitListener {
         		}
                 
         		if (tts != null && voice_on == true) {
-	        		tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+	        		tts.speak("Warm up Started", TextToSpeech.QUEUE_ADD, null);
         		}
+                startWarmUp();
         		
         	    Intent checkIntent = new Intent();
         	    checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
@@ -638,6 +647,13 @@ public class Workout extends Activity implements OnInitListener {
         	voice_on = true;
             Toast.makeText(this, R.string.voice_turned_on, Toast.LENGTH_SHORT).show();
             return true;
+        case SKIP_WARMUP:
+        	isWarmup = false;
+        	countdown.cancel();
+            mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
+            mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_high);
+            if (voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+        	return true;
         }
         return false;
     }
@@ -659,6 +675,11 @@ public class Workout extends Activity implements OnInitListener {
             .setIcon(android.R.drawable.ic_menu_search)
             .setShortcut('9', 'q');
         }
+        if (isWarmup) {
+        	menu.add(0, SKIP_WARMUP, 0, R.string.skip_warmup)
+        	.setIcon(android.R.drawable.ic_lock_power_off)
+        	.setShortcut('9', 'q');
+        }
         return true;
     }
     
@@ -666,9 +687,9 @@ public class Workout extends Activity implements OnInitListener {
 	public void onInit(int status) {
 		Log.i(TAG, "onInit");
         if (status == TextToSpeech.SUCCESS) {
-            Toast.makeText(Workout.this, "Text-To-Speech engine is initialized", Toast.LENGTH_LONG).show();
+            //Toast.makeText(Workout.this, "Text-To-Speech engine is initialized", Toast.LENGTH_LONG).show();
             if (voice_on == true) {
-            	tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+            	tts.speak("Warm Up Started", TextToSpeech.QUEUE_ADD, null);
             }
         }
         else if (status == TextToSpeech.ERROR) {
@@ -800,6 +821,28 @@ public class Workout extends Activity implements OnInitListener {
 		} else {
 			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/4.184) * 60 * duration;
 		}
+	}
+	
+	private void startWarmUp() {
+		isWarmup = true;
+        mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
+		countdown = new CountDownTimer(300000, 1000) {
+		     public void onTick(long millisUntilFinished) {
+		    	 int minutes = (int) (millisUntilFinished / (1000 * 60));
+		    	 int seconds = (int) ((millisUntilFinished/1000) - (60 * minutes));
+		    	 String adjustedSeconds = String.valueOf(seconds);
+		    	 if (seconds < 10) {
+		    		 adjustedSeconds = "0" + seconds;
+		    	 }
+		         mAdjustedHeartRange.setText("Warmup: " + minutes + ":" + adjustedSeconds);
+		     }
+
+		     public void onFinish() {
+		         mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_high);
+             	 if (voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+		         isWarmup = false;
+		     }
+		  }.start();
 	}
 
 }
