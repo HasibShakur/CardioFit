@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ public class EditProfile extends Activity {
 	private DBOperateDAO operatorDao;
 	private EditText nameText, ageText, weightText, heightFtText, heightInText;
 	private Button saveButton;
+	private RadioGroup radioGroup;
 	private Util util = new Util();
 	
 	@SuppressLint("NewApi")
@@ -65,8 +68,9 @@ public class EditProfile extends Activity {
 			heightInText.setText("" + height_in_int);
 			
 		}
-				
+		
 		saveButton = (Button) findViewById(R.id.buttonSaveButton);
+		radioGroup = (RadioGroup) findViewById(R.id.radioGroup1);
         saveButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -104,15 +108,23 @@ public class EditProfile extends Activity {
 				double ft = Double.parseDouble(heightFt.trim());
 				double in = Double.parseDouble(heightIn.trim());
 				profile.setHeight((ft*12)+in);
-
-				profile.setWeightManageHighHeartRate(util.getHeavyWeightManageHighHeartRate(profile.getPersonAge()));
-				profile.setWeightManageLowHeartRate(util.getHeavyWeightManageLowHeartRate(profile.getPersonAge()));
-				profile.setAerobicHighHeartRate(util.getLightAerobicHighHeartRate(profile.getPersonAge()));
-				profile.setAerobicLowHeartRate(util.getLightAerobicLowHeartRate(profile.getPersonAge()));
-				
+				String gender = "";
+				int selectedOption = radioGroup.getCheckedRadioButtonId();
+				if(selectedOption == R.id.radio_female)
+				{
+					gender = "f";
+				}
+				else if(selectedOption == R.id.radio_male)
+				{
+					gender = "m";
+				}
+				profile.setGender(gender);
 				ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
 				profiles = operatorDao.getAllProfiles();
-				
+				for(int i = 0;i<profiles.size();i++)
+				{
+					System.out.println(profiles.get(i).getPersonName() + "...."+ profiles.get(i).getGender());
+				}
 				if (!(profiles.size() < 1)) {
 					operatorDao.updateProfile(profile);
 					Toast.makeText(getApplicationContext(), "Profile Updated Successfully", Toast.LENGTH_LONG).show(); 
@@ -122,9 +134,29 @@ public class EditProfile extends Activity {
 				}
 				
 			}
+
+//			private String getGenderFromUI(View v) {
+//				String gender  ="m";
+//				boolean checked = ((RadioButton) v).isChecked();
+//				switch(v.getId()){
+//				case R.id.radio_male:
+//				if(checked)
+//				{
+//					gender = "m";
+//				}
+//				break;
+//				case R.id.radio_female:
+//				if(checked)
+//				{
+//					gender = "f";
+//				}
+//				break;
+//			}
+//				return gender;
+//			}
         });
 	}
-
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

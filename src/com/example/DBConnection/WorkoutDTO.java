@@ -22,6 +22,7 @@ public class WorkoutDTO {
 	private double burnedCalories;
 	private double timeWithinRange;
 	private String workoutType;
+	private double averageHeartRate;
 	
 	public long getId() {
 		return id;
@@ -82,6 +83,12 @@ public class WorkoutDTO {
 	}
 	public void setTimeWithinRange(double timeWithinRange) {
 		this.timeWithinRange = timeWithinRange;
+	}
+	public double getAverageHeartRate() {
+		return averageHeartRate;
+	}
+	public void setAverageHeartRate(double averageHeartRate) {
+		this.averageHeartRate = averageHeartRate;
 	}
 	
 

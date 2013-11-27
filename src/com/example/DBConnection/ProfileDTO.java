@@ -14,10 +14,7 @@ public class ProfileDTO {
 	private int personAge;
 	private double weight;
 	private double height;
-	private int weightManageHighHeartRate;
-	private int weightManageLowHeartRate;
-	private int aerobicHighHeartRate;
-	private int aerobicLowHeartRate;
+	private String gender;
 	public long getPersonId() {
 		return personId;
 	}
@@ -48,33 +45,10 @@ public class ProfileDTO {
 	public void setHeight(double height) {
 		this.height = height;
 	}
-	public int getWeightManageHighHeartRate() {
-		return weightManageHighHeartRate;
+	public String getGender() {
+		return gender;
 	}
-	public void setWeightManageHighHeartRate(int weightManageHighHeartRate) {
-		this.weightManageHighHeartRate = weightManageHighHeartRate;
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
-	public int getWeightManageLowHeartRate() {
-		return weightManageLowHeartRate;
-	}
-	public void setWeightManageLowHeartRate(int weightManageLowHeartRate) {
-		this.weightManageLowHeartRate = weightManageLowHeartRate;
-	}
-	public int getAerobicHighHeartRate() {
-		return aerobicHighHeartRate;
-	}
-	public void setAerobicHighHeartRate(int aerobicHighHeartRate) {
-		this.aerobicHighHeartRate = aerobicHighHeartRate;
-	}
-	public int getAerobicLowHeartRate() {
-		return aerobicLowHeartRate;
-	}
-	public void setAerobicLowHeartRate(int aerobicLowHeartRate) {
-		this.aerobicLowHeartRate = aerobicLowHeartRate;
-	}
-	
-	
-	
-	
-
 }

@@ -198,6 +198,7 @@ public class Workout extends Activity implements OnInitListener {
 	        	heart_range_low = Util.getHeavyWeightManageLowHeartRate(profiles.get(0).getPersonAge());
 		        heart_range_high = Util.getHeavyWeightManageHighHeartRate(profiles.get(0).getPersonAge());
 	        }
+
 	        current_range_low = heart_range_low;
 	        current_range_high = heart_range_high;
 	        
