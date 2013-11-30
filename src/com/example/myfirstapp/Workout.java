@@ -138,6 +138,7 @@ public class Workout extends Activity implements OnInitListener {
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
+    public static String current_range_type;
 
     private ArrayList<ProfileDTO> profiles = new ArrayList<ProfileDTO>();
     WorkoutDTO workout = new WorkoutDTO();
@@ -188,15 +189,19 @@ public class Workout extends Activity implements OnInitListener {
 			if (heartRange_type.equals("Light Aerobic")){
 	        	heart_range_low = Util.getLightAerobicLowHeartRate(profiles.get(0).getPersonAge());
 		        heart_range_high = Util.getLightAerobicHighHeartRate(profiles.get(0).getPersonAge());
+		        current_range_type = "Light Aerobic";
 			} else if (heartRange_type.equals("Heavy Aerobic")) {
 				heart_range_low = Util.getHeavyAerobicLowHeartRate(profiles.get(0).getPersonAge());
 		        heart_range_high = Util.getHeavyAerobicHighHeartRate(profiles.get(0).getPersonAge());
+		        current_range_type = "Heavy Aerobic";
 			} else if (heartRange_type.equals("Light Weight-Management")) {
 				heart_range_low = Util.getLightWeightManageLowHeartRate(profiles.get(0).getPersonAge());
 		        heart_range_high = Util.getLightWeightManageHighHeartRate(profiles.get(0).getPersonAge());
+		        current_range_type = "Light Weight-Management";
 	        } else {
 	        	heart_range_low = Util.getHeavyWeightManageLowHeartRate(profiles.get(0).getPersonAge());
 		        heart_range_high = Util.getHeavyWeightManageHighHeartRate(profiles.get(0).getPersonAge());
+		        current_range_type = "Heavy Weight-Management";
 	        }
 
 	        current_range_low = heart_range_low;
@@ -441,8 +446,13 @@ public class Workout extends Activity implements OnInitListener {
                 //If the user has heart range greater than the current range, but the current range is lower than desired range
                 //In this case, we will simply move the current_range higher because we want to get closer to the desired range
                 else if (avg > current_range_high && current_range_high < heart_range_high) {
-                	current_range_high = avg + 10;
-                	current_range_low = avg - 10;
+                	if (avg > heart_range_high) {
+                		current_range_low = heart_range_low;
+                		current_range_high = heart_range_high;
+                	} else {
+	                	current_range_high = avg + 10;
+	                	current_range_low = avg - 10;
+                	}
                 	consecutive_desired_lows += 1;
                 	consecutive_inrange_lows = consecutive_inrange_highs = 0;
                 	consecutive_outrange_lows = consecutive_outrange_highs = 0;
@@ -450,8 +460,13 @@ public class Workout extends Activity implements OnInitListener {
                 //If the user has heart range lower than the current range, but the current range is higher than the desired range
                 //In this case, we will simply move the current range lower, because we want to get closer to the desired range
                 else if (avg < current_range_low && current_range_low > heart_range_low && avg != 0) {
-                	current_range_high = avg + 10;
-                	current_range_low = avg - 10;
+                	if (avg < heart_range_low) {
+                		current_range_low = heart_range_low;
+                		current_range_high = heart_range_high;
+                	} else {
+                		current_range_high = avg + 10;
+                		current_range_low = avg - 10;
+                	}
                 	consecutive_desired_highs += 1;
                 	consecutive_inrange_lows = consecutive_inrange_highs = 0;
                 	consecutive_outrange_lows = consecutive_outrange_highs = 0;
@@ -509,19 +524,19 @@ public class Workout extends Activity implements OnInitListener {
                 
                 //If the user is continually below the desired heart range (even if they are within the current range)
                 if (consecutive_desired_lows >= 8) {
-                	if (voice_on) tts.speak("You need to raise your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
+                	if (tts != null && voice_on) tts.speak("You need to raise your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
                 	consecutive_desired_lows = 0;
                 }
                 //if the user is continually above the desired heart range (even if they are within the current range)
                 if (consecutive_desired_highs >= 8 ){
-                	if (voice_on) tts.speak("You need to lower your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
+                	if (tts != null && voice_on) tts.speak("You need to lower your heart rate to optimize your workout", TextToSpeech.QUEUE_ADD, null);
                 	consecutive_desired_highs = 0;
                 }
                                 
-                if (avg <= current_range_low && avg != 0 && voice_on == true) {
+                if (avg <= current_range_low && avg != 0 && tts != null && voice_on == true) {
             		tts.speak("Heart Rate Too Low", TextToSpeech.QUEUE_ADD, null);
                 }
-                if (avg >= current_range_high && voice_on == true) {
+                if (avg >= current_range_high && tts != null && voice_on == true) {
             		tts.speak("Heart Rate Too High", TextToSpeech.QUEUE_ADD, null);
                 }
                 
@@ -653,7 +668,7 @@ public class Workout extends Activity implements OnInitListener {
         	countdown.cancel();
             mAdjustedHeartRange = (TextView) findViewById(R.id.adjusted_heart_range_value);
             mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_high);
-            if (voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+            if (tts != null && voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
         	return true;
         }
         return false;
@@ -741,18 +756,17 @@ public class Workout extends Activity implements OnInitListener {
             workout.setLowHeartRate(min);
             
             // for just now these are set to 0.0
-            /*
+            
             int avgHeartRate = getAverage(heartRates);
             double weight = profiles.get(0).getWeight();
             int age = profiles.get(0).getPersonAge();
             long duration = endTime - startTime;
-            String gender = profiles.get(0).getPersonGender();
+            String gender = profiles.get(0).getGender();
             Double calories = CalculateCalories(gender, avgHeartRate, weight, age, duration); 
             workout.setBurnedCalories(calories);
-            */
-            workout.setBurnedCalories(0.0);
+            //workout.setBurnedCalories(0.0);
             workout.setTimeWithinRange(0.0);
-            //workout.setAverageHeartRate(avgHeartRate);
+            workout.setAverageHeartRate(avgHeartRate);
             operatorDao.CreateWorkout(workout);
             Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
      		finish();
@@ -778,6 +792,73 @@ public class Workout extends Activity implements OnInitListener {
         	})
         	.setNegativeButton("No", null)
         	.show();		
+	}
+	
+	public void upgradeRange (View view) {
+		if (current_range_type.equals("Light Aerobic")) {
+			//Go to Heavy Aerobic
+			heart_range_low = Util.getHeavyAerobicLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getHeavyAerobicHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Heavy Aerobic";
+		} else if (current_range_type.equals("Heavy Aerobic")) {
+			//Toast that you are already at maximum range
+            Toast.makeText(getApplicationContext(), "Already at maximum desired range!", Toast.LENGTH_LONG).show(); 
+			return;
+		} else if (current_range_type.equals("Light Weight-Management")) {
+			// go to heavy weight-management
+        	heart_range_low = Util.getHeavyWeightManageLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getHeavyWeightManageHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Heavy Weight-Management";
+		} else if (current_range_type.equals("Heavy Weight-Management")) {
+			// go to light aerobic
+        	heart_range_low = Util.getLightAerobicLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getLightAerobicHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Light Aerobic";
+		} else {
+            Toast.makeText(getApplicationContext(), "Error trying to upgrade range.", Toast.LENGTH_LONG).show(); 
+		}
+		//reset all consecutive counters
+		consecutive_desired_lows = consecutive_desired_highs = consecutive_inrange_lows = consecutive_inrange_highs = consecutive_desired_highs = consecutive_outrange_highs = consecutive_outrange_lows = 0;
+       
+		//Change the display
+		mHeartRange = (TextView) findViewById(R.id.heart_range_value);
+        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
+        
+		if (tts != null && voice_on) tts.speak("Desired range upgraded to " + current_range_type, TextToSpeech.QUEUE_ADD, null);
+
+		
+	}
+	
+	public void downgradeRange (View view) {
+		if (current_range_type.equals("Light Aerobic")) {
+			// go to heavy weight-management
+        	heart_range_low = Util.getHeavyWeightManageLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getHeavyWeightManageHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Heavy Weight-Management";
+		} else if (current_range_type.equals("Heavy Aerobic")) {
+			// go to light aerobic
+        	heart_range_low = Util.getLightAerobicLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getLightAerobicHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Light Aerobic";
+		} else if (current_range_type.equals("Light Weight-Management")) {
+			//Toast that you are already at minimum range
+            Toast.makeText(getApplicationContext(), "Already at minimum desired range!", Toast.LENGTH_LONG).show(); 
+        	return;
+		} else if (current_range_type.equals("Heavy Weight-Management")) {
+			// to to light weight-management
+			heart_range_low = Util.getLightWeightManageLowHeartRate(profiles.get(0).getPersonAge());
+	        heart_range_high = Util.getLightWeightManageHighHeartRate(profiles.get(0).getPersonAge());
+	        current_range_type = "Light Weight-Management";
+		}
+		// reset all consecutive counters
+		consecutive_desired_lows = consecutive_desired_highs = consecutive_inrange_lows = consecutive_inrange_highs = consecutive_desired_highs = consecutive_outrange_highs = consecutive_outrange_lows = 0;
+		
+		//change the display
+        mHeartRange = (TextView) findViewById(R.id.heart_range_value);
+        mHeartRange.setText(heart_range_low + " - " + heart_range_high);
+        
+		if (tts != null && voice_on) tts.speak("Desired range downgraded to " + current_range_type, TextToSpeech.QUEUE_ADD, null);
+
 	}
 	
   	/**
@@ -817,10 +898,22 @@ public class Workout extends Activity implements OnInitListener {
     
 
 	private Double CalculateCalories(String gender, int avgHeartRate, double weight, int age, long duration) {
-		if (gender == "male") {
-			return ((-55.0969 + (.6309 * avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * age)) / (4.184)) * 60 * duration;
+		if (gender == "m") {
+			Log.i("gender = ",  gender);
+			Log.i("avgHeartRate = " , "" + avgHeartRate);
+			Log.i("weight = ", "" + weight);
+			Log.i("age = " , "" + age);
+			Log.i("duration = " , "" + duration);
+			Log.i("hour duration = " , "" + duration/(60*1000*60));
+			return ((-55.0969 + (.6309 * avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * age)) / (4.184)) * 60 * (duration/1000*60*60);
 		} else {
-			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/4.184) * 60 * duration;
+			Log.i("gender = ",  gender);
+			Log.i("avgHeartRate = " , "" + avgHeartRate);
+			Log.i("weight = ", "" + weight);
+			Log.i("age = " , "" + age);
+			Log.i("duration = " , "" + duration);
+			Log.i("hour duration = " , "" + duration/(60*1000*60));
+			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/ 4.184) * 60 * (duration/1000*60*60);
 		}
 	}
 	
@@ -840,7 +933,7 @@ public class Workout extends Activity implements OnInitListener {
 
 		     public void onFinish() {
 		         mAdjustedHeartRange.setText(heart_range_low + " - " + heart_range_high);
-             	 if (voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
+             	 if (tts != null && voice_on) tts.speak("Workout Started", TextToSpeech.QUEUE_ADD, null);
 		         isWarmup = false;
 		     }
 		  }.start();
