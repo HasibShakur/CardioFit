@@ -134,6 +134,7 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_inrange_highs;
     public static int consecutive_low_threshold;
     public static int consecutive_high_threshold;
+    public static int consecutive_errors;
     public static boolean isWarmup = true;
     
     private NotificationManager mNM;
@@ -350,8 +351,15 @@ public class Workout extends Activity implements OnInitListener {
                 
                 //Ignore non-sensible data
                 if (heart_rate < 50 || heart_rate > 220) {
+                	consecutive_errors += 1;
+                	if (consecutive_errors >= 3) {
+                		mHeartRate.setText("Error");
+                	}
                 	break;
+                } else {
+                	consecutive_errors = 0;
                 }
+                
                 if (heart_rate < current_range_low) {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
                 } else if (heart_rate > current_range_high) {
