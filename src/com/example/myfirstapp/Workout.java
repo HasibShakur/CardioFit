@@ -136,14 +136,14 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_high_threshold;
     public static int consecutive_errors;
     public static boolean isWarmup = true;
-    public static long TimeWithinDesiredRange = 0;
-    public static long TimeWithinAdjustedRange = 0;
+    public static double TimeWithinDesiredRange = 0;
+    public static double TimeWithinAdjustedRange = 0;
     public boolean previously_out = true;
     public boolean previously_out_adjusted = true;
-    public static long adjustedStart;
-    public static long adjustedEnd;
-    public static long desiredStart;
-    public static long desiredEnd;
+    public static double adjustedStart;
+    public static double adjustedEnd;
+    public static double desiredStart;
+    public static double desiredEnd;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -808,6 +808,7 @@ public class Workout extends Activity implements OnInitListener {
             Double calories = CalculateCalories(gender, avgHeartRate, weight, age, duration); 
             workout.setBurnedCalories(calories);	    	 
             workout.setTimeWithinRange(TimeWithinDesiredRange);
+            //workout.setTimeWithinAdjustedRange(TimeWithinAdjustedRange);
             workout.setAverageHeartRate(avgHeartRate);
             operatorDao.CreateWorkout(workout);
             Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
@@ -947,15 +948,15 @@ public class Workout extends Activity implements OnInitListener {
 			Log.i("age = " , "" + age);
 			Log.i("duration = " , "" + duration);
 			Log.i("hour duration = " , "" + duration/(60*1000*60));
-			return ((-55.0969 + (.6309 * avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * age)) / (4.184)) * 60 * (duration/1000*60*60);
+			return ((-55.0969 + (.6309 * avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * age)) / (4.184)) * 60L * (duration/(1000L*60L*60L));
 		} else {
 			Log.i("gender = ",  gender);
 			Log.i("avgHeartRate = " , "" + avgHeartRate);
 			Log.i("weight = ", "" + weight);
 			Log.i("age = " , "" + age);
 			Log.i("duration = " , "" + duration);
-			Log.i("hour duration = " , "" + duration/(60*1000*60));
-			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/ 4.184) * 60 * (duration/1000*60*60);
+			Log.i("hour duration = " , "" + duration/(60L*1000L*60L));
+			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/ 4.184) * 60L * (duration/(1000L*60L*60L));
 		}
 	}
 	

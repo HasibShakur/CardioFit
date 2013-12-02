@@ -31,13 +31,8 @@ public class WorkoutHistory extends Activity {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.workout_history);
 	    createData();
-	    Log.i(TAG, "" + groups);
-	    Log.i(TAG, "groups.size() = " + groups.size());
 	    ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-	    Log.i(TAG, "listView = " + listView);
-	    Log.i(TAG, groups.get(0).string);
 	    MyExpandableListAdapter adapter = new MyExpandableListAdapter(this, groups);
-	    Log.i(TAG, "adapter = " + adapter);
 	    listView.setAdapter(adapter);
 	  }
 
@@ -62,8 +57,11 @@ public class WorkoutHistory extends Activity {
 			  group.children.add("Duration: " + durationInMinutes + " mins");
 			  group.children.add("Max Heart Rate: " + workout.getHighHeartRate());
 			  group.children.add("Min Heart Rate: " + workout.getLowHeartRate());
-			  //group.children.add("Avg Heart Rate: " + workout.getAverageHeartRate());
-			  //gropu.children.add("Time within desired range: " + workout.getTimeWithinRange());
+			  group.children.add("Avg Heart Rate: " + workout.getAverageHeartRate());
+			  double millisec = workout.getTimeWithinRange();
+			  int minutes = (int) millisec / (60 * 1000);
+			  int seconds = (int) (millisec/1000) - (60 * minutes);
+			  group.children.add("Time within desired range: " + minutes + ":" + seconds);
 			  group.children.add("Burned Calores: " + workout.getBurnedCalories());
 		      groups.append(j, group);
 			  j++;
