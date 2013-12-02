@@ -136,6 +136,14 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_high_threshold;
     public static int consecutive_errors;
     public static boolean isWarmup = true;
+    public static long TimeWithinDesiredRange = 0;
+    public static long TimeWithinAdjustedRange = 0;
+    public boolean previously_out = true;
+    public boolean previously_out_adjusted = true;
+    public static long adjustedStart;
+    public static long adjustedEnd;
+    public static long desiredStart;
+    public static long desiredEnd;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -352,7 +360,7 @@ public class Workout extends Activity implements OnInitListener {
                 //Ignore non-sensible data
                 if (heart_rate < 50 || heart_rate > 220) {
                 	consecutive_errors += 1;
-                	if (consecutive_errors >= 3) {
+                	if (consecutive_errors >= 6) {
                 		mHeartRate.setText("Error");
                 	}
                 	break;
@@ -360,12 +368,39 @@ public class Workout extends Activity implements OnInitListener {
                 	consecutive_errors = 0;
                 }
                 
+                if (heart_rate < heart_range_low || heart_rate > heart_range_high) {
+                	if (!previously_out) {
+                	 	desiredEnd = System.currentTimeMillis();
+                	 	TimeWithinDesiredRange += desiredEnd - desiredStart;
+                	 	previously_out = true;
+                	 }
+                } else {
+                	if (previously_out) {
+                		desiredStart = System.currentTimeMillis();
+ 	                	previously_out = false;
+                	}
+                }
+                
                 if (heart_rate < current_range_low) {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
+                	 if (!previously_out_adjusted) {
+                	 	adjustedEnd = System.currentTimeMillis();
+                	 	TimeWithinAdjustedRange += adjustedEnd - adjustedStart;
+                	 	previously_out = true;
+                	 }
                 } else if (heart_rate > current_range_high) {
                 	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
+	               	 if (!previously_out_adjusted) {
+	             	 	adjustedEnd = System.currentTimeMillis();
+	             	 	TimeWithinAdjustedRange += adjustedEnd - adjustedStart;
+	             	 	previously_out = true;
+	             	 }
                 } else {
                 	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
+                	if (previously_out_adjusted) {
+                		adjustedStart = System.currentTimeMillis();
+ 	                	previously_out = false;
+                	}
                 }
                 mHeartRate.setText(String.valueOf(heart_rate));
                 
@@ -771,9 +806,8 @@ public class Workout extends Activity implements OnInitListener {
             long duration = endTime - startTime;
             String gender = profiles.get(0).getGender();
             Double calories = CalculateCalories(gender, avgHeartRate, weight, age, duration); 
-            workout.setBurnedCalories(calories);
-            //workout.setBurnedCalories(0.0);
-            workout.setTimeWithinRange(0.0);
+            workout.setBurnedCalories(calories);	    	 
+            workout.setTimeWithinRange(TimeWithinDesiredRange);
             workout.setAverageHeartRate(avgHeartRate);
             operatorDao.CreateWorkout(workout);
             Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
