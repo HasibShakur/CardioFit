@@ -947,8 +947,8 @@ public class Workout extends Activity implements OnInitListener {
 			Log.i("weight = ", "" + weight);
 			Log.i("age = " , "" + age);
 			Log.i("duration = " , "" + duration);
-			Log.i("hour duration = " , "" + duration/(60*1000*60));
-			return ((-55.0969 + (.6309 * avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * age)) / (4.184)) * 60L * (duration/(1000L*60L*60L));
+			Log.i("hour duration = " , "" + duration/(60L*1000L*60L));
+			return ((-55.0969 + (.6309 * (long) avgHeartRate) + (0.1988 * (0.453592 * (long) weight)) + (0.2017 * (long) age)) / (4.184)) * 60L * (duration/(1000L*60L*60L));
 		} else {
 			Log.i("gender = ",  gender);
 			Log.i("avgHeartRate = " , "" + avgHeartRate);
@@ -956,7 +956,7 @@ public class Workout extends Activity implements OnInitListener {
 			Log.i("age = " , "" + age);
 			Log.i("duration = " , "" + duration);
 			Log.i("hour duration = " , "" + duration/(60L*1000L*60L));
-			return ((-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * age))/ 4.184) * 60L * (duration/(1000L*60L*60L));
+			return ((-20.4022 + (0.4472 * (long) avgHeartRate) - (0.1263 * (0.453592 * (long) weight)) + (0.074 * (long) age))/ 4.184) * 60L * (duration/(1000L*60L*60L));
 		}
 	}
 	

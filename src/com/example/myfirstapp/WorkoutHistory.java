@@ -52,16 +52,24 @@ public class WorkoutHistory extends Activity {
 		  for (WorkoutDTO workout : workouts) {
 			  Group group = new Group(workout.getWorkoutType() + ", " + workout.getWorkoutDate().toString().substring(0,10));
 			  long ms = workout.getWorkoutEnd().getTime() - workout.getWorkoutStart().getTime();
-			  long durationInMinutes = ms / (60 * 1000);
-
+			  long durationInMinutes = ms / (60L * 1000L);
+			  long durationInSeconds = (ms/1000L) - (60L * durationInMinutes);
+			  double msInDesiredRange = workout.getTimeWithinRange();
+			  long minutesInDesiredRange = ((long) msInDesiredRange / (60L * 1000L));
+			  long secondsInDesiredRange = ((long) msInDesiredRange/1000L) - (60L * minutesInDesiredRange);
+			  
+			  /*
+			  double millisecInAdjustedRange = workout.getTimeWithinAdjustedRange();
+			  long minutesInAdjustedRange = ((long) msInDesiredRange / (60L * 1000L));
+			  long secondsInAdjustedRange = ((long) msInAdjustedRange/1000L) - (60L * minutesInDesiredRange);
+			   */
+			  
 			  group.children.add("Duration: " + durationInMinutes + " mins");
 			  group.children.add("Max Heart Rate: " + workout.getHighHeartRate());
 			  group.children.add("Min Heart Rate: " + workout.getLowHeartRate());
 			  group.children.add("Avg Heart Rate: " + workout.getAverageHeartRate());
-			  double millisec = workout.getTimeWithinRange();
-			  int minutes = (int) millisec / (60 * 1000);
-			  int seconds = (int) (millisec/1000) - (60 * minutes);
-			  group.children.add("Time within desired range: " + minutes + ":" + seconds);
+			  group.children.add("Time within desired range: " + minutesInDesiredRange + ":" + secondsInDesiredRange);
+			  //group.children.add("Time within adjusted range: " + minutesInAdjustedRange + ":" + secondsInAdjustedRange);
 			  group.children.add("Burned Calores: " + workout.getBurnedCalories());
 		      groups.append(j, group);
 			  j++;
