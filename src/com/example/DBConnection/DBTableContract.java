@@ -41,5 +41,7 @@ public final class DBTableContract {
 		public static final String COLUMN_NAME_BURNED_CALORIES = "calories";
 		public static final String COLUMN_NAME_WORKOUT_TYPE = "workoutType";
 		public static final String COLUMN_NAME_AVG_HEART_RATE = "averageHeartRate";
+		public static final String COLUMN_NAME_TIME_WITHIN_DESIRED_RANGE = "timeWithinDesiredRange";
+		public static final String COLUMN_NAME_TIME_WITHIN_ADJUSTED_RANGE = "timeWithinAdjustedRange";
 	}
 }
