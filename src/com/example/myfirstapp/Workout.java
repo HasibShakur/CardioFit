@@ -360,7 +360,7 @@ public class Workout extends Activity implements OnInitListener {
                 //Ignore non-sensible data
                 if (heart_rate < 50 || heart_rate > 220) {
                 	consecutive_errors += 1;
-                	if (consecutive_errors >= 6) {
+                	if (consecutive_errors >= 3) {
                 		mHeartRate.setText("Error");
                 	}
                 	break;
@@ -517,7 +517,7 @@ public class Workout extends Activity implements OnInitListener {
                 //The user has a heart range lower than the current range, and the current range is lower than the desired range OR
                 //The user has a heart range higher than the current range, and the current range is higher than the desired range
                 else {
-                	consecutive_low_threshold = consecutive_high_threshold = 8;
+                	consecutive_low_threshold = consecutive_high_threshold = 4;
                 	//If the users heart rate is lower than the current range, and lower than the desired range
                 	//We will slowly decrement the current range dependent on how far away they are from the range
                 	if (avg < current_range_low && avg != 0) {
@@ -529,9 +529,7 @@ public class Workout extends Activity implements OnInitListener {
                 		} else if (current_range_low - avg > current_range_low * .2) {
                 			consecutive_low_threshold = 2;
                 		} else if (current_range_low - avg > current_range_low * .15) {
-                			consecutive_low_threshold = 4;
-                		} else if (current_range_low - avg > current_range_low * .1) {
-                			consecutive_low_threshold = 6;
+                			consecutive_low_threshold = 3;
                 		}
                 	} 
                 	//If the users heart rate is higher than the current range, and higher than the desired range
@@ -545,9 +543,7 @@ public class Workout extends Activity implements OnInitListener {
                 		} else if (avg - current_range_high> current_range_high * .2) {
                 			consecutive_high_threshold = 2;
                 		} else if (avg - current_range_high > current_range_high * .15) {
-                			consecutive_high_threshold = 4;
-                		} else if (current_range_high - avg > current_range_high * .1) {
-                			consecutive_high_threshold = 6;
+                			consecutive_high_threshold = 3;
                 		}
                 	}
                 	//If the user is failing to meet our customized heart rate --> need to lower it more
@@ -807,8 +803,8 @@ public class Workout extends Activity implements OnInitListener {
             String gender = profiles.get(0).getGender();
             Double calories = CalculateCalories(gender, avgHeartRate, weight, age, duration); 
             workout.setBurnedCalories(calories);	    	 
-            workout.setTimeWithinRange(TimeWithinDesiredRange);
-            //workout.setTimeWithinAdjustedRange(TimeWithinAdjustedRange);
+            workout.setTimeWithinDesiredRange(TimeWithinDesiredRange);
+            workout.setTimeWithinAdjustedRange(TimeWithinAdjustedRange);
             workout.setAverageHeartRate(avgHeartRate);
             operatorDao.CreateWorkout(workout);
             Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
@@ -941,22 +937,12 @@ public class Workout extends Activity implements OnInitListener {
     
 
 	private Double CalculateCalories(String gender, int avgHeartRate, double weight, int age, long duration) {
-		if (gender == "m") {
-			Log.i("gender = ",  gender);
-			Log.i("avgHeartRate = " , "" + avgHeartRate);
-			Log.i("weight = ", "" + weight);
-			Log.i("age = " , "" + age);
-			Log.i("duration = " , "" + duration);
-			Log.i("hour duration = " , "" + duration/(60L*1000L*60L));
-			return ((-55.0969 + (.6309 * (long) avgHeartRate) + (0.1988 * (0.453592 * (long) weight)) + (0.2017 * (long) age)) / (4.184)) * 60L * (duration/(1000L*60L*60L));
+		if (gender.equals("m")) {
+			double calories = ((-55.0969 + (.6309 * (double) avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * (double) age)) / (4.184)) * 60.0 * (duration/(1000.0*60.0*60.0));
+			return calories;
 		} else {
-			Log.i("gender = ",  gender);
-			Log.i("avgHeartRate = " , "" + avgHeartRate);
-			Log.i("weight = ", "" + weight);
-			Log.i("age = " , "" + age);
-			Log.i("duration = " , "" + duration);
-			Log.i("hour duration = " , "" + duration/(60L*1000L*60L));
-			return ((-20.4022 + (0.4472 * (long) avgHeartRate) - (0.1263 * (0.453592 * (long) weight)) + (0.074 * (long) age))/ 4.184) * 60L * (duration/(1000L*60L*60L));
+			double calories = ((-20.4022 + (0.4472 * (double) avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * (double) age))/ 4.184) * 60.0 * (duration/(1000.0*60.0*60.0));
+			return calories;
 		}
 	}
 	
