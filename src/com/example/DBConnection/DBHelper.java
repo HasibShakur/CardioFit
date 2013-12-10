@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DBHelper extends SQLiteOpenHelper{
 	
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "cardiofit.db";
     private static final String INTEGER_TYPE = " INTEGER";
 	private static final String TEXT_TYPE = " TEXT";
