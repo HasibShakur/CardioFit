@@ -20,6 +20,11 @@ import java.util.ArrayList;
 
 import com.example.DBConnection.DBOperateDAO;
 import com.example.DBConnection.ProfileDTO;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,6 +49,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -135,7 +141,7 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_low_threshold;
     public static int consecutive_high_threshold;
     public static int consecutive_errors;
-    public static boolean isWarmup = true;
+    public static boolean isWarmup;
     public static double TimeWithinDesiredRange = 0;
     public static double TimeWithinAdjustedRange = 0;
     public boolean previously_out = true;
@@ -144,6 +150,7 @@ public class Workout extends Activity implements OnInitListener {
     public static double adjustedEnd;
     public static double desiredStart;
     public static double desiredEnd;
+    public static int change_amount = 5;
     
     private NotificationManager mNM;
     private static boolean service_is_running = false;
@@ -410,6 +417,7 @@ public class Workout extends Activity implements OnInitListener {
                 
                 //Add the heart rate to an array to be used for calculating average heart rate
                 heartRates.add(heart_rate);
+                //heartRates.add(System.currentTimeMillis());
                 tempHeartRates.add(heart_rate);
                 
                 //Calculate average of last 15 heart rates
@@ -517,19 +525,21 @@ public class Workout extends Activity implements OnInitListener {
                 //The user has a heart range lower than the current range, and the current range is lower than the desired range OR
                 //The user has a heart range higher than the current range, and the current range is higher than the desired range
                 else {
-                	consecutive_low_threshold = consecutive_high_threshold = 4;
+                	consecutive_low_threshold = consecutive_high_threshold = 3;
                 	//If the users heart rate is lower than the current range, and lower than the desired range
                 	//We will slowly decrement the current range dependent on how far away they are from the range
                 	if (avg < current_range_low && avg != 0) {
                 		consecutive_desired_lows += 1;
                 		consecutive_outrange_lows += 1;
                 		consecutive_desired_highs = consecutive_outrange_highs = consecutive_inrange_highs = consecutive_inrange_lows = 0;
-                		if (current_range_low - avg > current_range_low * .3) {
+                		if (current_range_low - avg > current_range_low * .2) {
                 			consecutive_low_threshold = 1;
-                		} else if (current_range_low - avg > current_range_low * .2) {
+                			change_amount = 15;
+                		} else if (current_range_low - avg > current_range_low * .1) {
                 			consecutive_low_threshold = 2;
-                		} else if (current_range_low - avg > current_range_low * .15) {
-                			consecutive_low_threshold = 3;
+                			change_amount = 10;
+                		} else {
+                			change_amount = 5;
                 		}
                 	} 
                 	//If the users heart rate is higher than the current range, and higher than the desired range
@@ -538,25 +548,29 @@ public class Workout extends Activity implements OnInitListener {
                 		consecutive_desired_highs += 1;
                 		consecutive_outrange_highs += 1;
                 		consecutive_desired_lows = consecutive_outrange_lows = consecutive_inrange_lows = consecutive_inrange_highs = 0;
-                		if (avg - current_range_high > current_range_high * .3) {
+                		if (avg - current_range_high > current_range_high * .2) {
                 			consecutive_high_threshold = 1;
-                		} else if (avg - current_range_high> current_range_high * .2) {
+                			change_amount = 15;
+                		} else if (avg - current_range_high> current_range_high * .1) {
                 			consecutive_high_threshold = 2;
-                		} else if (avg - current_range_high > current_range_high * .15) {
-                			consecutive_high_threshold = 3;
+                			change_amount = 10;
+                		} else {
+                			change_amount = 5;
                 		}
                 	}
                 	//If the user is failing to meet our customized heart rate --> need to lower it more
                 	if (consecutive_outrange_lows >= consecutive_low_threshold) {
-            			current_range_low -= 5;
-            			current_range_high -= 5;
+            			current_range_low -= change_amount;
+            			current_range_high -= change_amount;
                 		consecutive_outrange_highs = consecutive_outrange_lows = 0;
+                		change_amount = 5;
                 	}
                 	//If the user is failing to bring heart rate down to customized heart rate --> need to raise range
                 	if (consecutive_outrange_highs >= consecutive_high_threshold) {
-            			current_range_low += 5;
-            			current_range_high += 5;
+            			current_range_low += change_amount;
+            			current_range_high += change_amount;
             			consecutive_outrange_highs = consecutive_outrange_lows = 0;
+            			change_amount = 5;
                 	}
                 }
                 
@@ -783,6 +797,17 @@ public class Workout extends Activity implements OnInitListener {
             int max = heartRates.get(0);
             int min = heartRates.get(0);
 
+            
+        	File f = new File(Environment.getExternalStorageDirectory() + File.separator + "heart_rates.csv");
+        	PrintWriter out = null;
+        	try {
+        		out = new PrintWriter(new FileOutputStream(f), true);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+        	Log.i("out = " , ""+ out);
+        	Log.i("f = " , "" + f);
+            
             for ( int i = 1; i < heartRates.size(); i++) {
                 if ( heartRates.get(i) > max) {
                 	max = heartRates.get(i);
@@ -790,6 +815,8 @@ public class Workout extends Activity implements OnInitListener {
                 if (heartRates.get(i) < min) {
                 	min = heartRates.get(i);
                 }
+    			out.print(heartRates.get(i));
+    			out.println();
             }
             workout.setHighHeartRate(max);
             workout.setLowHeartRate(min);
@@ -807,7 +834,14 @@ public class Workout extends Activity implements OnInitListener {
             workout.setTimeWithinAdjustedRange(TimeWithinAdjustedRange);
             workout.setAverageHeartRate(avgHeartRate);
             operatorDao.CreateWorkout(workout);
-            Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show(); 
+            Toast.makeText(getApplicationContext(), "Workout Data Saved Successfully", Toast.LENGTH_LONG).show();
+
+        	
+        	// Print the contents to the file
+			// Format: time	 x_value  y_value  z_value \n
+
+            
+            
      		finish();
      		
          }
