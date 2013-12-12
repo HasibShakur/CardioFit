@@ -125,7 +125,8 @@ public class Workout extends Activity implements OnInitListener {
     private BluetoothChatService mChatService = null;
     
     /**Variables Used For manipulating heart range**/
-    private ArrayList<Integer> heartRates = new ArrayList<Integer>();
+    private HeartRateData heartRates = new HeartRateData();
+    //private ArrayList<Integer> heartRates = new ArrayList<Integer>();
     private ArrayList<Integer> tempHeartRates = new ArrayList<Integer>();
     public static ArrayList<Integer> avgTempHeartRates = new ArrayList<Integer>();
     public static int heart_range_low;
@@ -142,14 +143,14 @@ public class Workout extends Activity implements OnInitListener {
     public static int consecutive_high_threshold;
     public static int consecutive_errors;
     public static boolean isWarmup;
-    public static double TimeWithinDesiredRange = 0;
-    public static double TimeWithinAdjustedRange = 0;
+    public static long TimeWithinDesiredRange = 0;
+    public static long TimeWithinAdjustedRange = 0;
     public boolean previously_out = true;
     public boolean previously_out_adjusted = true;
-    public static double adjustedStart;
-    public static double adjustedEnd;
-    public static double desiredStart;
-    public static double desiredEnd;
+    public static long adjustedStart;
+    public static long adjustedEnd;
+    public static long desiredStart;
+    public static long desiredEnd;
     public static int change_amount = 5;
     
     private NotificationManager mNM;
@@ -392,21 +393,24 @@ public class Workout extends Activity implements OnInitListener {
                 	mHeartRate.setTextColor(Color.parseColor("#33B5E5"));
                 	 if (!previously_out_adjusted) {
                 	 	adjustedEnd = System.currentTimeMillis();
+                	 	Log.i(TAG, "ADDING TIME TO ADJUSTED!");
                 	 	TimeWithinAdjustedRange += adjustedEnd - adjustedStart;
-                	 	previously_out = true;
+                	 	Log.i("time = " , "" + TimeWithinAdjustedRange/1000);
+                	 	previously_out_adjusted = true;
                 	 }
                 } else if (heart_rate > current_range_high) {
                 	mHeartRate.setTextColor(Color.parseColor("#FF4444"));
 	               	 if (!previously_out_adjusted) {
 	             	 	adjustedEnd = System.currentTimeMillis();
+                	 	Log.i(TAG, "ADDING TIME TO ADJUSTED!");
 	             	 	TimeWithinAdjustedRange += adjustedEnd - adjustedStart;
-	             	 	previously_out = true;
+	             	 	previously_out_adjusted = true;
 	             	 }
                 } else {
                 	mHeartRate.setTextColor(Color.parseColor("#99CC00"));
                 	if (previously_out_adjusted) {
                 		adjustedStart = System.currentTimeMillis();
- 	                	previously_out = false;
+ 	                	previously_out_adjusted = false;
                 	}
                 }
                 mHeartRate.setText(String.valueOf(heart_rate));
@@ -416,8 +420,9 @@ public class Workout extends Activity implements OnInitListener {
                 }
                 
                 //Add the heart rate to an array to be used for calculating average heart rate
-                heartRates.add(heart_rate);
-                //heartRates.add(System.currentTimeMillis());
+                //heartRates.add(heart_rate);
+                heartRates.heartRates.add(heart_rate);
+                heartRates.timeStamps.add(System.currentTimeMillis());
                 tempHeartRates.add(heart_rate);
                 
                 //Calculate average of last 15 heart rates
@@ -503,6 +508,7 @@ public class Workout extends Activity implements OnInitListener {
                 	} else {
 	                	current_range_high = avg + 10;
 	                	current_range_low = avg - 10;
+	                	//TODO: change this to be .05 of HRmax
                 	}
                 	consecutive_desired_lows += 1;
                 	consecutive_inrange_lows = consecutive_inrange_highs = 0;
@@ -517,6 +523,7 @@ public class Workout extends Activity implements OnInitListener {
                 	} else {
                 		current_range_high = avg + 10;
                 		current_range_low = avg - 10;
+                		//TODO: change this to be .05 of HRmax
                 	}
                 	consecutive_desired_highs += 1;
                 	consecutive_inrange_lows = consecutive_inrange_highs = 0;
@@ -782,7 +789,7 @@ public class Workout extends Activity implements OnInitListener {
          @Override
          public void onClick(DialogInterface dialog, int which) {
         	//If the heart monitor was never attached --> can't save any information
-         	if (heartRates.size() == 0) {
+         	if (heartRates.heartRates.size() == 0) {
          		Toast.makeText(getApplicationContext(), "No workout data to save", Toast.LENGTH_LONG).show();
          		return;
          	}
@@ -794,8 +801,8 @@ public class Workout extends Activity implements OnInitListener {
             workout.setWorkoutStart(new Time(startTime));
             workout.setWorkoutEnd(new Time(endTime));
             workout.setWorkoutType(mWorkoutType.getText().toString().trim());
-            int max = heartRates.get(0);
-            int min = heartRates.get(0);
+            int max = heartRates.heartRates.get(0);
+            int min = heartRates.heartRates.get(0);
 
             
         	File f = new File(Environment.getExternalStorageDirectory() + File.separator + "heart_rates.csv");
@@ -808,14 +815,16 @@ public class Workout extends Activity implements OnInitListener {
         	Log.i("out = " , ""+ out);
         	Log.i("f = " , "" + f);
             
-            for ( int i = 1; i < heartRates.size(); i++) {
-                if ( heartRates.get(i) > max) {
-                	max = heartRates.get(i);
+            for ( int i = 1; i < heartRates.heartRates.size(); i++) {
+                if ( heartRates.heartRates.get(i) > max) {
+                	max = heartRates.heartRates.get(i);
                 }
-                if (heartRates.get(i) < min) {
-                	min = heartRates.get(i);
+                if (heartRates.heartRates.get(i) < min) {
+                	min = heartRates.heartRates.get(i);
                 }
-    			out.print(heartRates.get(i));
+    			out.print(heartRates.timeStamps.get(i));
+    			out.print(",");
+    			out.print(heartRates.heartRates.get(i));
     			out.println();
             }
             workout.setHighHeartRate(max);
@@ -823,13 +832,18 @@ public class Workout extends Activity implements OnInitListener {
             
             // for just now these are set to 0.0
             
-            int avgHeartRate = getAverage(heartRates);
+            int avgHeartRate = getAverage(heartRates.heartRates);
             double weight = profiles.get(0).getWeight();
             int age = profiles.get(0).getPersonAge();
             long duration = endTime - startTime;
             String gender = profiles.get(0).getGender();
             Double calories = CalculateCalories(gender, avgHeartRate, weight, age, duration); 
             workout.setBurnedCalories(calories);	    	 
+            
+            Log.i(TAG, "timeWithinAdjustedRange in ms = " + TimeWithinAdjustedRange);
+            Log.i(TAG, "timeWithinDesiredRange = " + (TimeWithinDesiredRange));
+            Log.i(TAG, "timeWithinAdjustedRange = " + (TimeWithinAdjustedRange / (1000)));
+            //TODO: get the desired and adjusted time. Need to force an "out of range" so the time you were in the range when you quit
             workout.setTimeWithinDesiredRange(TimeWithinDesiredRange);
             workout.setTimeWithinAdjustedRange(TimeWithinAdjustedRange);
             workout.setAverageHeartRate(avgHeartRate);

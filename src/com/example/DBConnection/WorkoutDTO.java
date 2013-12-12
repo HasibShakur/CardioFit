@@ -23,22 +23,22 @@ public class WorkoutDTO {
 	private double timeWithinRange;
 	private String workoutType;
 	private double averageHeartRate;
-	private double timeWithinDesiredRange;
+	private long timeWithinDesiredRange;
+	private long timeWithinAdjustedRange;
+
 	
-	
-	public double getTimeWithinDesiredRange() {
+	public long getTimeWithinDesiredRange() {
 		return timeWithinDesiredRange;
 	}
-	public void setTimeWithinDesiredRange(double timeWithinDesiredRange) {
+	public void setTimeWithinDesiredRange(long timeWithinDesiredRange) {
 		this.timeWithinDesiredRange = timeWithinDesiredRange;
 	}
-	public double getTimeWithinAdjustedRange() {
+	public long getTimeWithinAdjustedRange() {
 		return timeWithinAdjustedRange;
 	}
-	public void setTimeWithinAdjustedRange(double timeWithinAdjustedRange) {
+	public void setTimeWithinAdjustedRange(long timeWithinAdjustedRange) {
 		this.timeWithinAdjustedRange = timeWithinAdjustedRange;
 	}
-	private double timeWithinAdjustedRange;
 	
 	public long getId() {
 		return id;
@@ -93,12 +93,6 @@ public class WorkoutDTO {
 	}
 	public void setWorkoutType(String workoutType) {
 		this.workoutType = workoutType;
-	}
-	public double getTimeWithinRange() {
-		return timeWithinRange;
-	}
-	public void setTimeWithinRange(double timeWithinRange) {
-		this.timeWithinRange = timeWithinRange;
 	}
 	public double getAverageHeartRate() {
 		return averageHeartRate;

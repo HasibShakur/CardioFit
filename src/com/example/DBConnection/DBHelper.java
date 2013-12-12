@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DBHelper extends SQLiteOpenHelper{
 	
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "cardiofit.db";
     private static final String INTEGER_TYPE = " INTEGER";
 	private static final String TEXT_TYPE = " TEXT";
@@ -46,7 +46,6 @@ public class DBHelper extends SQLiteOpenHelper{
 	Workout.COLUMN_NAME_END_TIME + TEXT_TYPE + NOT_NULL_CONSTRAINT + COMMA_SEP + 
 	Workout.COLUMN_NAME_HEART_RATE_HIGH + INTEGER_TYPE + NOT_NULL_CONSTRAINT + COMMA_SEP +
 	Workout.COLUMN_NAME_HEART_RATE_LOW + INTEGER_TYPE + NOT_NULL_CONSTRAINT + COMMA_SEP +
-	Workout.COLUMN_NAME_TIME_WITHIN_RANGE + REAL_TYPE + COMMA_SEP +
 	Workout.COLUMN_NAME_TIME_WITHIN_DESIRED_RANGE + REAL_TYPE + COMMA_SEP +
 	Workout.COLUMN_NAME_TIME_WITHIN_ADJUSTED_RANGE + REAL_TYPE + COMMA_SEP +
 	Workout.COLUMN_NAME_BURNED_CALORIES + REAL_TYPE + COMMA_SEP +

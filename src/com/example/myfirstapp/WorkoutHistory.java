@@ -56,24 +56,36 @@ public class WorkoutHistory extends Activity {
 			  long durationInMinutes = ms / (60L * 1000L);
 			  long durationInSeconds = (ms/1000L) - (60L * durationInMinutes);
 			 
-			  double msInDesiredRange = workout.getTimeWithinRange();
-			  long minutesInDesiredRange = ((long) msInDesiredRange / (60L * 1000L));
-			  long secondsInDesiredRange = ((long) msInDesiredRange/1000L) - (60L * minutesInDesiredRange);
-			  
+
+		    	 
 			  double calories = workout.getBurnedCalories();
 			  String formattedCalories = new DecimalFormat("#.##").format(calories);
 
-			  double msInAdjustedRange = workout.getTimeWithinAdjustedRange();
-			  long minutesInAdjustedRange = ((long) msInAdjustedRange / (60L * 1000L));
-			  long secondsInAdjustedRange = ((long) msInAdjustedRange/1000L) - (60L * minutesInAdjustedRange);
+			  long msInDesiredRange = workout.getTimeWithinDesiredRange();
+			  long minutesInDesiredRange = ((long) msInDesiredRange / (60L * 1000L));
+			  long secondsInDesiredRange = ((long) msInDesiredRange/1000L) - (60L * minutesInDesiredRange);
+			  String desiredSeconds = String.valueOf(secondsInDesiredRange);
+		    	 if (secondsInDesiredRange < 10) {
+		    		 desiredSeconds = "0" + secondsInDesiredRange;
+		    	 }
+		    	 
+		    	 
+			  long msInAdjustedRange = workout.getTimeWithinAdjustedRange();
+			  long minutesInAdjustedRange = (( msInAdjustedRange / (60 * 1000)) % 60);
+			  long secondsInAdjustedRange = ( msInAdjustedRange/1000L) % 60L;
+			  String adjustedSeconds = String.valueOf(secondsInAdjustedRange);
+		    	 if (secondsInAdjustedRange < 10) {
+		    		 adjustedSeconds = "0" + secondsInAdjustedRange;
+		    	 }
+
 			   
 			  
 			  group.children.add("Duration: " + durationInMinutes + " mins");
 			  group.children.add("Max Heart Rate: " + workout.getHighHeartRate());
 			  group.children.add("Min Heart Rate: " + workout.getLowHeartRate());
 			  group.children.add("Avg Heart Rate: " + workout.getAverageHeartRate());
-			  group.children.add("Time within desired range: " + minutesInDesiredRange + ":" + secondsInDesiredRange);
-			  group.children.add("Time within adjusted range: " + minutesInAdjustedRange + ":" + secondsInAdjustedRange);
+			  group.children.add("Time within desired range: " + minutesInDesiredRange + ":" + desiredSeconds);
+			  group.children.add("Time within adjusted range: " + minutesInAdjustedRange + ":" + adjustedSeconds);
 			  group.children.add("Burned Calores: " + formattedCalories);
 		      groups.append(j, group);
 			  j++;

@@ -35,7 +35,6 @@ public class DBOperateDAO {
 			DBTableContract.Workout.COLUMN_NAME_START_TIME, DBTableContract.Workout.COLUMN_NAME_END_TIME,
 			DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW,
 			DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES,
-			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, 
 			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_DESIRED_RANGE,
 			DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_ADJUSTED_RANGE,
 			DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, 
@@ -108,7 +107,6 @@ public class DBOperateDAO {
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_HIGH, workout.getHighHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_HEART_RATE_LOW, workout.getLowHeartRate());
 		values.put(DBTableContract.Workout.COLUMN_NAME_BURNED_CALORIES, workout.getBurnedCalories());
-		values.put(DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_RANGE, workout.getTimeWithinRange());
 		values.put(DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_DESIRED_RANGE, workout.getTimeWithinDesiredRange());
 		values.put(DBTableContract.Workout.COLUMN_NAME_TIME_WITHIN_ADJUSTED_RANGE, workout.getTimeWithinAdjustedRange());
 		values.put(DBTableContract.Workout.COLUMN_NAME_WORKOUT_TYPE, workout.getWorkoutType());
@@ -150,9 +148,13 @@ public class DBOperateDAO {
 	@SuppressWarnings("deprecation")
 	private WorkoutDTO cursorToWorkout(Cursor c)
 	{
+		Log.i("cursor = " , "" + c);
 		WorkoutDTO w = new WorkoutDTO();
+		Log.i("id = " , "" + c.getLong(0));
 		w.setId(c.getLong(0));
+		Log.i("profId = " , "" + c.getLong(1));
 		w.setProfileId(c.getLong(1));
+		Log.i("date = ", c.getString(2));
 		String date = c.getString(2);
 		String formatted_date = "00/00/0000";
 		try {
@@ -174,11 +176,11 @@ public class DBOperateDAO {
 		w.setHighHeartRate(c.getInt(5));
 		w.setLowHeartRate(c.getInt(6));
 		w.setBurnedCalories(c.getDouble(7));
-		w.setTimeWithinRange(c.getDouble(8));
-		w.setTimeWithinDesiredRange(c.getDouble(9));
-		w.setTimeWithinAdjustedRange(10);
-		w.setWorkoutType(c.getString(11));
-		w.setAverageHeartRate(c.getDouble(12));
+		w.setTimeWithinDesiredRange(c.getLong(8));
+		w.setTimeWithinAdjustedRange(c.getLong(9));
+		w.setWorkoutType(c.getString(10));
+		Log.i("avg hr = " , "" + c.getDouble(11));
+		w.setAverageHeartRate(c.getDouble(11));
 		return w;
 		
 	}
