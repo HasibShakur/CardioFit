@@ -6,6 +6,7 @@ package com.example.myfirstapp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -87,11 +88,23 @@ public class Util {
   		String formattedDate = cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" +         cal.get(Calendar.YEAR);
   		return formattedDate;
   	}
-  	
-  	/*public static Time timeConversion (String timeStr) {
-		DateFormat formatter = new SimpleDateFormat("hh:mm:ss a");
-		Date date = (Date)formatter.parse(timeStr);
-		java.sql.Time.valueOf(date);
-		return date
-  	}*/
+
+    public static int getAverage(ArrayList<Integer> heartRates) {
+    	int total = 0;
+        for (int hr : heartRates) {
+        	total = total + hr;
+        }
+        int avg = total/heartRates.size();
+    	return avg;
+    }
+    
+	public static Double CalculateCalories(String gender, int avgHeartRate, double weight, int age, long duration) {
+		if (gender.equals("m")) {
+			double calories = ((-55.0969 + (.6309 * (double) avgHeartRate) + (0.1988 * (0.453592 * weight)) + (0.2017 * (double) age)) / (4.184)) * 60.0 * (duration/(1000.0*60.0*60.0));
+			return calories;
+		} else {
+			double calories = ((-20.4022 + (0.4472 * (double) avgHeartRate) - (0.1263 * (0.453592 * weight)) + (0.074 * (double) age))/ 4.184) * 60.0 * (duration/(1000.0*60.0*60.0));
+			return calories;
+		}
+	}
 }
