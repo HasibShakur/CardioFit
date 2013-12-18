@@ -30,16 +30,11 @@ import java.util.Set;
 import zephyr.android.BioHarnessBT.BTClient;
 import zephyr.android.BioHarnessBT.ZephyrProtocol;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -59,7 +54,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,12 +72,7 @@ public class Workout extends Activity implements OnInitListener {
 	ZephyrProtocol _protocol;
 	NewConnectedListener _NConnListener;
 	private final int HEART_RATE = 0x100;
-	private final int RESPIRATION_RATE = 0x101;
-	private final int SKIN_TEMPERATURE = 0x102;
-	private final int POSTURE = 0x103;
-	private final int PEAK_ACCLERATION = 0x104;
-	
-    private TextToSpeech tts;
+	private TextToSpeech tts;
     private static boolean voice_on = true;
     private static final int VOICE_OFF = 9;
     private static final int VOICE_ON = 8;
@@ -125,16 +114,11 @@ public class Workout extends Activity implements OnInitListener {
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
-    // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
 	private static final int MY_DATA_CHECK_CODE = 0;
 
-    private String mConnectedDeviceName = null;
-    private ArrayAdapter<String> mConversationArrayAdapter;
     private BluetoothAdapter mBluetoothAdapter = null;
-    private BluetoothChatService mChatService = null;
     
     /**Variables Used For manipulating heart range**/
     private HeartRateData heartRates = new HeartRateData();
@@ -165,7 +149,6 @@ public class Workout extends Activity implements OnInitListener {
     public static long desiredEnd;
     public static int change_amount = 5;
     
-    private NotificationManager mNM;
     private static boolean service_is_running = false;
     public static String current_range_type;
 
@@ -302,6 +285,11 @@ public class Workout extends Activity implements OnInitListener {
         // Stop the Bluetooth chat services
         disconnect();
         
+        //reset some key global variables
+        service_is_running = false;
+        isWarmup = false;
+        TimeWithinAdjustedRange = 0;
+        TimeWithinDesiredRange = 0;
         //tts.shutdown();
 
     }
@@ -353,7 +341,6 @@ public class Workout extends Activity implements OnInitListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent serverIntent = null;
         switch (item.getItemId()) {
         case secure_connect_scan:
         	connect();
@@ -480,7 +467,8 @@ public class Workout extends Activity implements OnInitListener {
             Log.i(TAG, "timeWithinAdjustedRange in ms = " + TimeWithinAdjustedRange);
             Log.i(TAG, "timeWithinDesiredRange = " + (TimeWithinDesiredRange));
             Log.i(TAG, "timeWithinAdjustedRange = " + (TimeWithinAdjustedRange / (1000)));
-            //TODO: get the desired and adjusted time. Need to force an "out of range" so the time you were in the range when you quit
+            
+            //This forces our system to add time if the heart rate is currently within range
         	if (!previously_out) {
         	 	desiredEnd = System.currentTimeMillis();
         	 	TimeWithinDesiredRange += desiredEnd - desiredStart;
@@ -589,22 +577,6 @@ public class Workout extends Activity implements OnInitListener {
 
 	}
 	
-  	/**
-     * Show a notification while this service is running.
-     */
-    @SuppressWarnings("deprecation")
-	private void showNotification() {
-        CharSequence text = getText(R.string.app_name);
-        Notification notification = new Notification(R.drawable.heart1, null, System.currentTimeMillis());
-        notification.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-        Intent heartrateIntent = new Intent();
-        heartrateIntent.setComponent(new ComponentName(this, Workout.class));
-        heartrateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, heartrateIntent, 0);
-        notification.setLatestEventInfo(this, text, getText(R.string.notification_subtitle), contentIntent);
-
-        mNM.notify(R.string.app_name, notification);
-    }
     
     @Override
     public void onBackPressed() {
@@ -693,7 +665,7 @@ public class Workout extends Activity implements OnInitListener {
 		
 		//BhMacID = btDevice.getAddress();
 		BluetoothDevice Device = mBluetoothAdapter.getRemoteDevice(BhMacID);
-		String DeviceName = Device.getName();
+		Device.getName();
 		_bt = new BTClient(mBluetoothAdapter, BhMacID);
 		_NConnListener = new NewConnectedListener(Newhandler,Newhandler);
 		_bt.addConnectedEventListener(_NConnListener);
@@ -748,17 +720,14 @@ public class Workout extends Activity implements OnInitListener {
     }
     
 
-    final  Handler Newhandler = new Handler(){
+    @SuppressLint("HandlerLeak")
+	final  Handler Newhandler = new Handler(){
     	public void handleMessage(Message msg)
     	{
-    		TextView tv;
     		switch (msg.what)
     		{
     		case HEART_RATE:
     			String HeartRatetext = msg.getData().getString("HeartRate");
-    			//tv = (EditText)findViewById(R.id.labelHeartRate);
-    			System.out.println("Heart Rate Info is "+ HeartRatetext);
-    			//if (tv != null)tv.setText(HeartRatetext);
     			int heart_rate = Integer.valueOf(HeartRatetext);
     			runAlgorithm(heart_rate);
     		break;    		
@@ -917,7 +886,6 @@ public class Workout extends Activity implements OnInitListener {
             	int maxHeartRate = Util.getMaxHeartRate(age);
             	current_range_high = (int) (avg + (maxHeartRate * .05));
             	current_range_low = (int) (avg + (maxHeartRate * .05));
-            	//TODO: change this to be .05 of HRmax
         	}
         	consecutive_desired_lows += 1;
         	consecutive_inrange_lows = consecutive_inrange_highs = 0;
@@ -935,7 +903,6 @@ public class Workout extends Activity implements OnInitListener {
             	int maxHeartRate = Util.getMaxHeartRate(age);
             	current_range_high = (int) (avg + (maxHeartRate * .05));
             	current_range_low = (int) (avg + (maxHeartRate * .05));
-        		//TODO: change this to be .05 of HRmax
         	}
         	consecutive_desired_highs += 1;
         	consecutive_inrange_lows = consecutive_inrange_highs = 0;
