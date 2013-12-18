@@ -122,7 +122,6 @@ public class Workout extends Activity implements OnInitListener {
     
     /**Variables Used For manipulating heart range**/
     private HeartRateData heartRates = new HeartRateData();
-    //private ArrayList<Integer> heartRates = new ArrayList<Integer>();
     private ArrayList<Integer> tempHeartRates = new ArrayList<Integer>();
     public static ArrayList<Integer> avgTempHeartRates = new ArrayList<Integer>();
     public static int heart_range_low;

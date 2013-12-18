@@ -102,6 +102,14 @@ public class EditProfile extends Activity {
 					Toast.makeText(getApplicationContext(), "Height is provided", Toast.LENGTH_LONG).show(); 
 					return;
 				}
+				if ((heightFt == null || heightFt.isEmpty())) {
+					Toast.makeText(getApplicationContext(), "Height in feet is not provided", Toast.LENGTH_LONG).show();
+					return;
+				}
+				if ((heightIn == null || heightIn.isEmpty())) {
+					Toast.makeText(getApplicationContext(), "Height in inches is not provided", Toast.LENGTH_LONG).show();
+					return;
+				}
 				profile.setPersonName(userName.trim());
 				profile.setPersonAge(Integer.parseInt(age.trim()));
 				profile.setWeight(Double.parseDouble(weight.trim()));

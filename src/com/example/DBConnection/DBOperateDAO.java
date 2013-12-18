@@ -166,8 +166,8 @@ public class DBOperateDAO {
 		splitter = formatted_date.split("/");
 		
 		Date d = new Date();
-		d.setDate(Integer.parseInt(splitter[0]));
-		d.setMonth(Integer.parseInt(splitter[1]));
+		d.setDate(Integer.parseInt(splitter[0]) - 1);
+		d.setMonth(Integer.parseInt(splitter[1]) - 1);
 		d.setYear(Integer.parseInt(splitter[2]));
 		w.setWorkoutDate(d);
 		
